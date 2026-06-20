@@ -279,6 +279,31 @@ body {
   background-color: rgba(0, 0, 0, 0.05); 
 }
 
+/* SPECIALIST LINKS OVERLAY (SLIDE 9) */
+.specialist-links-overlay {
+  position: absolute;
+  top: 35%; 
+  left: 12%; 
+  width: 76%;
+  height: 25%; 
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none; 
+}
+
+.specialist-link {
+  width: 45%;
+  height: 100%;
+  pointer-events: auto; 
+  cursor: pointer;
+  border-radius: 30px;
+  transition: background-color 0.3s ease;
+}
+
+.specialist-link:hover {
+  background-color: rgba(255, 255, 255, 0.1); 
+}
+
 /* AUDIO PLAYER */
 .audio-btn {
   position: fixed;

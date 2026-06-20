@@ -123,6 +123,7 @@ const PackageModal = ({ isOpen, onClose, packageSize }) => {
 
 const AudioPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
   const audioRef = React.useRef(null);
 
   useEffect(() => {
@@ -147,14 +148,10 @@ const AudioPlayer = () => {
     };
   }, [isPlaying]);
 
-  const togglePlay = () => {
+  const toggleMute = () => {
     if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
+      audioRef.current.muted = !audioRef.current.muted;
+      setIsMuted(audioRef.current.muted);
     }
   };
 
@@ -162,11 +159,11 @@ const AudioPlayer = () => {
     <>
       <audio ref={audioRef} loop src="/music/Sebusur%20Pelangi.mp3" preload="auto" />
       <button 
-        className={`audio-btn ${isPlaying ? 'playing' : ''}`} 
-        onClick={togglePlay}
-        aria-label="Toggle Music"
+        className={`audio-btn ${isPlaying && !isMuted ? 'playing' : ''}`} 
+        onClick={toggleMute}
+        aria-label="Toggle Mute"
       >
-        <span className="audio-icon">🎵</span>
+        <span className="audio-icon">{isMuted ? '🔇' : '🎵'}</span>
       </button>
     </>
   );
@@ -214,7 +211,27 @@ function App() {
           <div className="slide-content">
             <img src={slide.src} alt={`FMO Slide ${slide.id}`} className="slide-image" />
             
-            {/* Clickable Overlay for Contact Us Slide (Slide 24 is index 23, but id is 24) */}
+            {/* Clickable Overlay for Your Personal Wedding Specialist (Slide 9) */}
+            {slide.id === 9 && (
+              <div className="specialist-links-overlay">
+                <a 
+                  href="https://instagram.com/byzackyjalaluddin" 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="specialist-link"
+                  aria-label="Zacky Instagram"
+                ></a>
+                <a 
+                  href="https://instagram.com/byfauziahwindi" 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="specialist-link"
+                  aria-label="Windi Instagram"
+                ></a>
+              </div>
+            )}
+
+            {/* Clickable Overlay for Contact Us Slide (Slide 24) */}
             {slide.id === 24 && (
               <div className="contact-links-overlay">
                 <a 
