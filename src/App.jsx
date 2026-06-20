@@ -133,34 +133,18 @@ const PackageModal = ({ isOpen, onClose, packageSize }) => {
   );
 };
 
-const AudioPlayer = () => {
+const AudioPlayer = ({ hasEntered }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const audioRef = React.useRef(null);
 
   useEffect(() => {
-    const playAudio = () => {
-      if (audioRef.current && audioRef.current.paused) {
-        audioRef.current.play().catch(err => {
-          console.log("Autoplay prevented by browser until interaction.");
-        });
-      }
-    };
-    
-    // Play on first interaction if autoplay fails initially
-    document.body.addEventListener('click', playAudio, { once: true });
-    document.body.addEventListener('touchstart', playAudio, { once: true });
-    document.body.addEventListener('scroll', playAudio, { once: true });
-    
-    // Also try to play immediately
-    playAudio();
-
-    return () => {
-      document.body.removeEventListener('click', playAudio);
-      document.body.removeEventListener('touchstart', playAudio);
-      document.body.removeEventListener('scroll', playAudio);
-    };
-  }, []);
+    if (hasEntered && audioRef.current && audioRef.current.paused) {
+      audioRef.current.play().catch(err => {
+        console.log("Autoplay prevented by browser:", err);
+      });
+    }
+  }, [hasEntered]);
 
   const toggleMute = () => {
     if (audioRef.current) {
@@ -195,9 +179,26 @@ const AudioPlayer = () => {
   );
 };
 
+const WelcomeOverlay = ({ onEnter }) => {
+  return (
+    <div className="welcome-overlay">
+      <div className="welcome-content">
+        <div className="welcome-logo">
+          FMO <span className="welcome-logo-sub">wedding specialist.</span>
+        </div>
+        <p className="welcome-text">Turn on your sound for the best experience.</p>
+        <button className="welcome-btn" onClick={onEnter}>
+          Enter Website
+        </button>
+      </div>
+    </div>
+  );
+};
+
 function App() {
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [hasEntered, setHasEntered] = useState(false);
 
   // Exclude slides 14, 15, 16, 17, and 18 from main scroll
   const excludeSlides = [14, 15, 16, 17, 18];
@@ -218,19 +219,23 @@ function App() {
   };
 
   return (
-    <div className="presentation-container">
-      <Header onOpenPackage={handleOpenPackage} />
-      <AudioPlayer />
-      
-      <PackageModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        packageSize={selectedPackage} 
-      />
+    <>
+      {!hasEntered && <WelcomeOverlay onEnter={() => setHasEntered(true)} />}
 
-      {slides.map((slide, index) => (
-        <section 
-          key={index}
+      <div className={`presentation-container ${!hasEntered ? 'locked' : ''}`}>
+        <Header onOpenPackage={handleOpenPackage} />
+        
+        <AudioPlayer hasEntered={hasEntered} />
+        
+        <PackageModal 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+          packageSize={selectedPackage} 
+        />
+
+        {slides.map((slide, index) => (
+          <section 
+            key={index}
           id={`slide-${slide.id}`}
           className="slide-section" 
         >
@@ -287,7 +292,9 @@ function App() {
           </div>
         </section>
       ))}
-    </div>
+      
+      </div>
+    </>
   );
 }
 
