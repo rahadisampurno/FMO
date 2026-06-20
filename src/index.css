@@ -396,12 +396,17 @@ body {
     position: static;
     background: transparent;
     box-shadow: none;
+    border: none;
+    transform: none;
+    min-width: auto;
     padding-left: 20px;
     padding-top: 10px;
     display: flex;
     flex-direction: column;
     gap: 10px;
     width: 100%;
+    animation: none;
+    backdrop-filter: none;
   }
   
   .dropdown-item {

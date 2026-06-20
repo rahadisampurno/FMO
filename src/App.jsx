@@ -140,10 +140,8 @@ const AudioPlayer = () => {
 
   useEffect(() => {
     const playAudio = () => {
-      if (audioRef.current && !isPlaying) {
-        audioRef.current.play().then(() => {
-          setIsPlaying(true);
-        }).catch(err => {
+      if (audioRef.current && audioRef.current.paused) {
+        audioRef.current.play().catch(err => {
           console.log("Autoplay prevented by browser until interaction.");
         });
       }
@@ -151,25 +149,41 @@ const AudioPlayer = () => {
     
     // Play on first interaction if autoplay fails initially
     document.body.addEventListener('click', playAudio, { once: true });
+    document.body.addEventListener('touchstart', playAudio, { once: true });
+    document.body.addEventListener('scroll', playAudio, { once: true });
     
-    // Also try to play immediately (works in some browsers if previously interacted)
+    // Also try to play immediately
     playAudio();
 
     return () => {
       document.body.removeEventListener('click', playAudio);
+      document.body.removeEventListener('touchstart', playAudio);
+      document.body.removeEventListener('scroll', playAudio);
     };
-  }, [isPlaying]);
+  }, []);
 
   const toggleMute = () => {
     if (audioRef.current) {
       audioRef.current.muted = !audioRef.current.muted;
       setIsMuted(audioRef.current.muted);
+      
+      if (audioRef.current.paused) {
+        audioRef.current.play().catch(e => console.log(e));
+      }
     }
   };
 
   return (
     <>
-      <audio ref={audioRef} loop src="/music/Sebusur%20Pelangi.mp3" preload="auto" />
+      <audio 
+        ref={audioRef} 
+        loop 
+        autoPlay 
+        src="/music/Sebusur%20Pelangi.mp3" 
+        preload="auto" 
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+      />
       <button 
         className={`audio-btn ${isPlaying && !isMuted ? 'playing' : ''}`} 
         onClick={toggleMute}
