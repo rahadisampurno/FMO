@@ -5,17 +5,16 @@ const slideCount = 25;
 const Header = ({ onOpenPackage }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isPackagesHovered, setIsPackagesHovered] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       const container = document.querySelector('.presentation-container');
-      if (container && container.scrollTop > 50) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
+      if (container) {
+        setIsScrolled(container.scrollTop > 50);
       }
     };
-
+    
     const container = document.querySelector('.presentation-container');
     if (container) {
       container.addEventListener('scroll', handleScroll);
@@ -23,24 +22,37 @@ const Header = ({ onOpenPackage }) => {
     }
   }, []);
 
-  const scrollToSlide = (e, target) => {
+  const scrollToSlide = (e, id) => {
     e.preventDefault();
-    const element = document.querySelector(target);
-    const container = document.querySelector('.presentation-container');
-    if (element && container) {
-      container.scrollTo({
-        top: element.offsetTop,
-        behavior: 'smooth'
-      });
+    setIsMobileMenuOpen(false);
+    const element = document.querySelector(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
+  const handlePackageClick = (size) => {
+    setIsMobileMenuOpen(false);
+    setIsPackagesHovered(false);
+    onOpenPackage(size);
+  };
+
   return (
-    <header className={`app-header ${isScrolled ? 'scrolled' : ''}`}>
+    <header className={`app-header ${isScrolled ? 'scrolled' : ''} ${isMobileMenuOpen ? 'menu-open' : ''}`}>
       <div className="header-logo" onClick={(e) => scrollToSlide(e, '#slide-1')} style={{cursor: 'pointer'}}>
         FMO <span className="header-logo-sub">wedding specialist.</span>
       </div>
-      <nav className="header-nav">
+      
+      {/* Mobile Hamburger Button */}
+      <button 
+        className="hamburger" 
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        aria-label="Toggle menu"
+      >
+        {isMobileMenuOpen ? '✕' : '☰'}
+      </button>
+
+      <nav className={`header-nav ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
         <a href="#slide-3" onClick={(e) => scrollToSlide(e, '#slide-3')} className="header-link">Prologue</a>
         
         {/* Packages Dropdown */}
@@ -49,17 +61,17 @@ const Header = ({ onOpenPackage }) => {
           onMouseEnter={() => setIsPackagesHovered(true)}
           onMouseLeave={() => setIsPackagesHovered(false)}
         >
-          <a href="#" onClick={(e) => e.preventDefault()} className="header-link packages-link">
+          <a href="#" onClick={(e) => { e.preventDefault(); setIsPackagesHovered(!isPackagesHovered); }} className="header-link packages-link">
             Packages ▼
           </a>
           {isPackagesHovered && (
             <div className="dropdown-menu">
-              <button className="dropdown-item" onClick={() => onOpenPackage('100')}>100 pax</button>
-              <button className="dropdown-item" onClick={() => onOpenPackage('350')}>350 pax</button>
-              <button className="dropdown-item" onClick={() => onOpenPackage('500')}>500 pax</button>
-              <button className="dropdown-item" onClick={() => onOpenPackage('1000')}>1000 pax</button>
-              <button className="dropdown-item" onClick={() => onOpenPackage('akad_masjid')}>Akad Di Masjid</button>
-              <button className="dropdown-item" onClick={() => onOpenPackage('addons')}>Add-ons</button>
+              <button className="dropdown-item" onClick={() => handlePackageClick('100')}>100 pax</button>
+              <button className="dropdown-item" onClick={() => handlePackageClick('350')}>350 pax</button>
+              <button className="dropdown-item" onClick={() => handlePackageClick('500')}>500 pax</button>
+              <button className="dropdown-item" onClick={() => handlePackageClick('1000')}>1000 pax</button>
+              <button className="dropdown-item" onClick={() => handlePackageClick('akad_masjid')}>Akad Di Masjid</button>
+              <button className="dropdown-item" onClick={() => handlePackageClick('addons')}>Add-ons</button>
             </div>
           )}
         </div>

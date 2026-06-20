@@ -48,6 +48,7 @@ body {
   padding: 15px 40px;
 }
 
+
 .header-logo {
   font-family: 'Playfair Display', serif;
   font-size: 24px;
@@ -120,8 +121,19 @@ body {
 }
 
 .dropdown-item:hover {
-  background: rgba(197, 168, 124, 0.1);
-  color: #c5a87c;
+  background-color: #c4a976;
+  color: #172725;
+}
+
+/* MOBILE MENU HAMBURGER */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: #c4a976;
+  font-size: 1.8rem;
+  cursor: pointer;
+  padding: 5px;
 }
 
 @keyframes fadeIn {
@@ -339,4 +351,80 @@ body {
 
 @keyframes spin {
   100% { transform: rotate(360deg); }
+}
+
+/* MEDIA QUERIES */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 15px 20px;
+  }
+  
+  .hamburger {
+    display: block;
+  }
+  
+  .header-nav {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: rgba(23, 39, 37, 0.98);
+    padding: 0 20px 20px 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    align-items: flex-start;
+    border-top: 1px solid rgba(196, 169, 118, 0.2);
+  }
+  
+  .header-nav.mobile-open {
+    display: flex;
+  }
+  
+  .header-link {
+    width: 100%;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 1rem;
+  }
+  
+  .header-link-wrapper {
+    width: 100%;
+  }
+  
+  .dropdown-menu {
+    position: static;
+    background: transparent;
+    box-shadow: none;
+    padding-left: 20px;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+  
+  .dropdown-item {
+    font-size: 0.9rem;
+    padding: 8px 0;
+    text-align: left;
+    width: 100%;
+  }
+  
+  .app-header.menu-open {
+    background-color: rgba(23, 39, 37, 1);
+  }
+
+  .header-logo {
+    font-size: 1.2rem;
+  }
+
+  .slide-content {
+    max-width: 90%;
+  }
+  
+  .modal-close {
+    top: 10px;
+    right: 10px;
+  }
 }
