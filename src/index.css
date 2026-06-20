@@ -59,6 +59,14 @@ body {
   color: #c5a87c;
   font-weight: 600;
   letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+}
+
+.header-logo-img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
 }
 
 .header-logo-sub {
@@ -284,9 +292,14 @@ body {
   flex-direction: column;
 }
 
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .welcome-content {
   text-align: center;
-  animation: fadeIn 1s ease;
+  animation: fadeInUp 1s ease;
 }
 
 .welcome-logo {
@@ -295,6 +308,15 @@ body {
   color: #c5a87c;
   font-weight: 600;
   letter-spacing: 2px;
+  display: flex;
+  justify-content: center;
+}
+
+.welcome-logo-img {
+  width: 450px;
+  max-width: 80vw;
+  height: auto;
+  object-fit: contain;
 }
 
 .welcome-logo-sub {
@@ -306,15 +328,10 @@ body {
   margin-top: 0px;
 }
 
-.welcome-text {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
-  margin: 30px 0;
-  color: #fff;
-  opacity: 0.7;
-}
-
 .welcome-btn {
+  margin-top: -180px;
+  position: relative;
+  z-index: 2;
   background: transparent;
   border: 1px solid #c5a87c;
   color: #c5a87c;

@@ -40,7 +40,7 @@ const Header = ({ onOpenPackage }) => {
   return (
     <header className={`app-header ${isScrolled ? 'scrolled' : ''} ${isMobileMenuOpen ? 'menu-open' : ''}`}>
       <div className="header-logo" onClick={(e) => scrollToSlide(e, '#slide-1')} style={{cursor: 'pointer'}}>
-        FMO <span className="header-logo-sub">wedding specialist.</span>
+        <img src="/logo.png" alt="FMO Wedding Specialist" className="header-logo-img" />
       </div>
       
       {/* Mobile Hamburger Button */}
@@ -184,9 +184,8 @@ const WelcomeOverlay = ({ onEnter }) => {
     <div className="welcome-overlay">
       <div className="welcome-content">
         <div className="welcome-logo">
-          FMO <span className="welcome-logo-sub">wedding specialist.</span>
+          <img src="/logo.png" alt="FMO Wedding Specialist" className="welcome-logo-img" />
         </div>
-        <p className="welcome-text">Turn on your sound for the best experience.</p>
         <button className="welcome-btn" onClick={onEnter}>
           Enter Website
         </button>
