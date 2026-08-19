@@ -310,6 +310,7 @@ body {
   letter-spacing: 2px;
   display: flex;
   justify-content: center;
+  margin-bottom: -60px; /* Memotong sebagian batas bawah logo */
 }
 
 .welcome-logo-img {
@@ -317,6 +318,7 @@ body {
   max-width: 80vw;
   height: auto;
   object-fit: contain;
+  pointer-events: none; /* Mencegah gambar memblokir klik tombol */
 }
 
 .welcome-logo-sub {
@@ -329,7 +331,7 @@ body {
 }
 
 .welcome-btn {
-  margin-top: -180px;
+  margin-top: 1px;
   position: relative;
   z-index: 2;
   background: transparent;

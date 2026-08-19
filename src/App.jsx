@@ -71,7 +71,6 @@ const Header = ({ onOpenPackage }) => {
               <button className="dropdown-item" onClick={() => handlePackageClick('500')}>500 pax</button>
               <button className="dropdown-item" onClick={() => handlePackageClick('1000')}>1000 pax</button>
               <button className="dropdown-item" onClick={() => handlePackageClick('akad_masjid')}>Akad Di Masjid</button>
-              <button className="dropdown-item" onClick={() => handlePackageClick('addons')}>Add-ons</button>
             </div>
           )}
         </div>
@@ -90,9 +89,7 @@ const PackageModal = ({ isOpen, onClose, packageSize }) => {
   if (!isOpen) return null;
 
   let content;
-  if (packageSize === 'addons') {
-    content = <img src="/slides/slide-18.png" alt="Add-ons" className="modal-image" />;
-  } else if (packageSize === 'akad_masjid') {
+  if (packageSize === 'akad_masjid') {
     content = (
       <>
         <img src="/packages/15_M.png" alt="Akad Di Masjid 1" className="modal-image" />
@@ -110,13 +107,14 @@ const PackageModal = ({ isOpen, onClose, packageSize }) => {
       '1000': 'D'
     };
     const letter = letterMap[packageSize];
+    const addonsFile = packageSize === '1000' ? '17_D.png' : `17${letter}.png`;
     content = (
       <>
         <img src="/slides/slide-14.png" alt="Package Intro" className="modal-image" />
         <img src={`/packages/15${letter}.png`} alt={`Package ${packageSize} pax part 1`} className="modal-image" />
         <img src={`/packages/16${letter}.png`} alt={`Package ${packageSize} pax part 2`} className="modal-image" />
         <img src="/slides/slide-17.png" alt="Package closing quote" className="modal-image" />
-        <img src="/slides/slide-18.png" alt="Add-ons" className="modal-image" />
+        <img src={`/packages/${addonsFile}`} alt="Add-ons" className="modal-image" />
       </>
     );
   }
