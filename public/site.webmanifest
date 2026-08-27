@@ -1,0 +1,12 @@
+{
+  "name": "FMO Wedding Specialist",
+  "short_name": "FMO",
+  "description": "Wedding planning personal, transparan, dan terarah.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#071915",
+  "theme_color": "#071915",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
