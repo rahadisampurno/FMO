@@ -191,7 +191,7 @@ function Header({ onConsult, onPackage }) {
   return (
     <header className={`site-header ${scrolled || menuOpen ? 'site-header--scrolled' : ''} ${menuOpen ? 'site-header--menu-open' : ''}`}>
       <a className="brand" href="#home" onClick={navigate} aria-label="FMO Wedding Specialist home">
-        <img src="/logo.webp" alt="FMO Wedding Specialist" width="2480" height="1748" />
+        <img src="/logo.png?v=20260827b" alt="FMO Wedding Specialist" width="800" height="564" />
       </a>
       <button className={`menu-toggle ${menuOpen ? 'menu-toggle--open' : ''}`} type="button" onClick={() => setMenuOpen((value) => !value)} aria-expanded={menuOpen} aria-label="Buka menu navigasi">
         <span /><span />
@@ -262,7 +262,7 @@ function AudioControl() {
       {!entered && (
         <div className={`entry-screen ${leaving ? 'entry-screen--leaving' : ''}`} role="dialog" aria-modal="true" aria-label="Selamat datang di FMO Wedding Specialist">
           <div className="entry-screen__content">
-            <img src="/logo.webp" alt="FMO Wedding Specialist" width="410" height="289" />
+            <img src="/logo.png?v=20260827b" alt="FMO Wedding Specialist" width="800" height="564" />
             <button type="button" onClick={enterWebsite}>Enter Website</button>
           </div>
         </div>
@@ -704,7 +704,7 @@ function App() {
         <section className="closing"><div className="closing__image" aria-hidden="true"><img src="/assets/closing-couple-hd.webp" srcSet="/assets/closing-couple-840.webp 840w, /assets/closing-couple-1280.webp 1280w, /assets/closing-couple-hd.webp 1672w" sizes="100vw" alt="" width="1672" height="941" loading="lazy" decoding="async" /></div><div className="closing__veil" /><div className="closing__content shell"><p className="eyebrow">Begin your story</p><h2>Let’s make your day<br /><em>expertly yours.</em></h2><p>Mulai dari obrolan sederhana. Ceritakan impianmu, kami bantu menyusun jalannya.</p><button className="button button--gold" type="button" onClick={() => openConsult()}>Jadwalkan konsultasi <HiArrowUpRight /></button></div></section>
       </main>
 
-      <footer><div className="shell footer__top"><div className="footer__brand"><img src="/logo.webp" alt="FMO Wedding Specialist" width="2480" height="1748" /><p>Wedding planning yang personal, transparan, dan sepenuh hati.</p></div><div><p className="footer__label">Explore</p><a href="#about">Tentang FMO</a><a href="#workflow">Workflow</a><a href="#guardian">Wedding Day Guardian</a><a href="#packages">Packages</a><a href="#real-weddings">Selected celebrations</a><a href="#services">Other services</a><a href="#faq">FAQ</a></div><div><p className="footer__label">Connect</p><a href="https://instagram.com/fmo_weddingspecialist" target="_blank" rel="noreferrer"><FaInstagram /> Instagram</a><a href="https://tiktok.com/@fmo_weddingspecialist" target="_blank" rel="noreferrer"><FaTiktok /> TikTok</a><a href="https://wa.me/6281221212877" target="_blank" rel="noreferrer"><FaWhatsapp /> WhatsApp</a></div><div><p className="footer__label">Information</p><p>Bandung, West Java<br />Available beyond the city.</p><button type="button" onClick={() => setLegalOpen('privacy')}>Privacy Policy</button><button type="button" onClick={() => setLegalOpen('terms')}>Terms of Use</button></div></div><div className="shell footer__bottom"><span>© {new Date().getFullYear()} FMO Wedding Specialist</span><span>expertly <em>yours.</em></span></div></footer>
+      <footer><div className="shell footer__top"><div className="footer__brand"><img src="/logo.png?v=20260827b" alt="FMO Wedding Specialist" width="800" height="564" /><p>Wedding planning yang personal, transparan, dan sepenuh hati.</p></div><div><p className="footer__label">Explore</p><a href="#about">Tentang FMO</a><a href="#workflow">Workflow</a><a href="#guardian">Wedding Day Guardian</a><a href="#packages">Packages</a><a href="#real-weddings">Selected celebrations</a><a href="#services">Other services</a><a href="#faq">FAQ</a></div><div><p className="footer__label">Connect</p><a href="https://instagram.com/fmo_weddingspecialist" target="_blank" rel="noreferrer"><FaInstagram /> Instagram</a><a href="https://tiktok.com/@fmo_weddingspecialist" target="_blank" rel="noreferrer"><FaTiktok /> TikTok</a><a href="https://wa.me/6281221212877" target="_blank" rel="noreferrer"><FaWhatsapp /> WhatsApp</a></div><div><p className="footer__label">Information</p><p>Bandung, West Java<br />Available beyond the city.</p><button type="button" onClick={() => setLegalOpen('privacy')}>Privacy Policy</button><button type="button" onClick={() => setLegalOpen('terms')}>Terms of Use</button></div></div><div className="shell footer__bottom"><span>© {new Date().getFullYear()} FMO Wedding Specialist</span><span>expertly <em>yours.</em></span></div></footer>
 
       <AudioControl />
       <button className="floating-consult" type="button" onClick={() => openConsult()} aria-label="Buka konsultasi"><FaWhatsapp /><span>Konsultasi</span></button>

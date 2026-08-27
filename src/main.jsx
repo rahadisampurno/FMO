@@ -21,7 +21,7 @@ class SiteErrorBoundary extends Component {
     if (!this.state.hasError) return this.props.children
     return (
       <main className="error-fallback">
-        <img src="/logo.webp" alt="FMO Wedding Specialist" width="2480" height="1748" />
+        <img src="/logo.png?v=20260827b" alt="FMO Wedding Specialist" width="800" height="564" />
         <p>We are restoring your experience.</p>
         <h1>Halaman ini perlu dimuat kembali.</h1>
         <span>Tidak ada data konsultasi yang dikirim atau disimpan.</span>
