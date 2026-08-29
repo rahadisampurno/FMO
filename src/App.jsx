@@ -58,6 +58,34 @@ const selectedMoments = [
   { id: '03', title: 'Joyful gathering', label: 'Warm & expressive', image: '/assets/closing-couple-hd.webp', alt: 'Pasangan pengantin menikmati perayaan bersama tamu', copy: 'Perayaan penuh energi yang tetap terasa personal karena setiap momen dan perpindahan acara telah dipersiapkan.' },
 ];
 
+const galleryImages = [
+  { src: '/gallery/fmo-gallery-01.webp', width: 1200, height: 1800, alt: 'Pasangan pengantin duduk di pelaminan dengan rangkaian bunga berwarna hangat' },
+  { src: '/gallery/fmo-gallery-02.webp', width: 1202, height: 1800, alt: 'Pasangan pengantin mengenakan busana adat Jawa tersenyum bersama' },
+  { src: '/gallery/fmo-gallery-03.webp', width: 1600, height: 1067, alt: 'Siluet pasangan pengantin saling meraih tangan' },
+  { src: '/gallery/fmo-gallery-04.webp', width: 1600, height: 1067, alt: 'Pasangan pengantin berdiri di bawah pepohonan dalam suasana modern' },
+  { src: '/gallery/fmo-gallery-05.webp', width: 1600, height: 1067, alt: 'Suasana prosesi pernikahan yang tertata bersama keluarga' },
+  { src: '/gallery/fmo-gallery-06.webp', width: 1600, height: 1067, alt: 'Pengantin pria dan sahabat menikmati momen perayaan' },
+  { src: '/gallery/fmo-gallery-07.webp', width: 1200, height: 1800, alt: 'Potret pengantin pria mengenakan busana adat' },
+  { src: '/gallery/fmo-gallery-08.webp', width: 1200, height: 1800, alt: 'Orang tua membantu mempersiapkan busana pengantin pria' },
+  { src: '/gallery/fmo-gallery-09.webp', width: 1600, height: 1069, alt: 'Detail pengantin wanita dalam busana adat putih' },
+  { src: '/gallery/fmo-gallery-10.webp', width: 1200, height: 1800, alt: 'Detail pasangan pengantin dengan buket bunga putih' },
+  { src: '/gallery/fmo-gallery-11.webp', width: 1200, height: 1800, alt: 'Detail busana adat pengantin pria dalam nuansa hitam putih' },
+  { src: '/gallery/fmo-gallery-12.webp', width: 1600, height: 1067, alt: 'Pasangan pengantin berfoto bersama tim FMO Wedding Specialist' },
+  { src: '/gallery/fmo-gallery-13.webp', width: 1200, height: 1800, alt: 'Pengantin pria berbicara bersama keluarga saat prosesi akad' },
+  { src: '/gallery/fmo-gallery-14.webp', width: 1600, height: 1067, alt: 'Prosesi pernikahan dengan tradisi kehormatan militer' },
+  { src: '/gallery/fmo-gallery-15.webp', width: 1600, height: 1067, alt: 'Tim FMO melakukan pengecekan terakhir sebelum acara dimulai' },
+  { src: '/gallery/fmo-gallery-16.webp', width: 1600, height: 1067, alt: 'Momen hangat pasangan pengantin bersama keluarga' },
+  { src: '/gallery/fmo-gallery-17.webp', width: 1600, height: 1069, alt: 'Pasangan pengantin menikmati perayaan bersama para tamu' },
+  { src: '/gallery/fmo-gallery-18.webp', width: 1600, height: 1067, alt: 'Detail dekorasi dan rangkaian bunga pernikahan' },
+  { src: '/gallery/fmo-gallery-19.webp', width: 1600, height: 1069, alt: 'Pasangan pengantin dalam momen candid yang penuh kebahagiaan' },
+  { src: '/gallery/fmo-gallery-20.webp', width: 1202, height: 1800, alt: 'Potret pengantin wanita menjelang prosesi pernikahan' },
+];
+
+const fullGalleryImages = Array.from({ length: 174 }, (_, index) => ({
+  src: `/gallery/full/fmo-${String(index + 1).padStart(3, '0')}.webp`,
+  alt: `Dokumentasi perayaan FMO ${String(index + 1).padStart(3, '0')}`,
+}));
+
 const packageComparison = [
   ['Guest scale', 'Up to 100', 'Up to 350', 'Up to 500', 'Up to 1.000'],
   ['Best for', 'Intimate moments', 'Signature celebration', 'Larger celebration', 'Grand-scale event'],
@@ -572,12 +600,101 @@ function PackageModal({ isOpen, onClose, packageSize, onConsult }) {
   );
 }
 
+function GallerySection({ onOpen }) {
+  const previewImages = [galleryImages[3], galleryImages[0], galleryImages[5], galleryImages[9], galleryImages[11], galleryImages[2]];
+
+  return (
+    <section className="gallery-section" id="gallery">
+      <div className="shell">
+        <header className="gallery-section__heading">
+          <div>
+            <p className="eyebrow">The moments we hold</p>
+            <h2>Stories, beautifully<br /><em>remembered.</em></h2>
+          </div>
+          <div>
+            <p>Setiap perayaan meninggalkan cerita yang berbeda. Inilah sebagian momen yang pernah dipercayakan kepada FMO.</p>
+            <button className="button gallery-section__button" type="button" onClick={onOpen}>Lihat semua koleksi <HiArrowUpRight /></button>
+          </div>
+        </header>
+        <div className="gallery-preview">
+          {previewImages.map((image, index) => (
+            <button className={`gallery-preview__item gallery-preview__item--${index + 1}`} type="button" onClick={onOpen} aria-label={`Buka galeri dari foto ${index + 1}`} key={image.src}>
+              <img src={image.src} width={image.width} height={image.height} alt={image.alt} loading="lazy" decoding="async" />
+              <span>{String(index + 1).padStart(2, '0')}</span>
+            </button>
+          ))}
+        </div>
+        <div className="gallery-section__mobile-cta">
+          <button className="button gallery-section__button" type="button" onClick={onOpen}>Lihat semua koleksi <HiArrowUpRight /></button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function GalleryModal({ onClose }) {
+  const [selectedIndex, setSelectedIndex] = useState(null);
+  const selectedImage = selectedIndex === null ? null : fullGalleryImages[selectedIndex];
+
+  useEffect(() => {
+    const onKey = (event) => {
+      if (event.key === 'Escape') {
+        if (selectedIndex !== null) setSelectedIndex(null);
+        else onClose();
+      }
+      if (selectedIndex !== null && event.key === 'ArrowLeft') setSelectedIndex((selectedIndex - 1 + fullGalleryImages.length) % fullGalleryImages.length);
+      if (selectedIndex !== null && event.key === 'ArrowRight') setSelectedIndex((selectedIndex + 1) % fullGalleryImages.length);
+    };
+    document.addEventListener('keydown', onKey);
+    document.body.classList.add('modal-lock');
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.classList.remove('modal-lock');
+    };
+  }, [onClose, selectedIndex]);
+
+  const showPrevious = () => setSelectedIndex((selectedIndex - 1 + fullGalleryImages.length) % fullGalleryImages.length);
+  const showNext = () => setSelectedIndex((selectedIndex + 1) % fullGalleryImages.length);
+
+  return (
+    <div className="gallery-overlay">
+      <section className="gallery-modal" role="dialog" aria-modal="true" aria-labelledby="gallery-title">
+        <header className="gallery-modal__header">
+          <div><span>FMO Wedding Gallery</span><h2 id="gallery-title">A collection of <em>beautiful stories.</em></h2></div>
+          <div><p>{fullGalleryImages.length} moments</p><button type="button" onClick={onClose} aria-label="Tutup galeri" autoFocus><HiOutlineXMark /></button></div>
+        </header>
+        <div className="gallery-modal__scroll">
+          <p className="gallery-modal__intro">Sebuah arsip kecil tentang cinta, keluarga, detail, dan perayaan yang kami jaga sepenuh hati.</p>
+          <div className="gallery-collection">
+            {fullGalleryImages.map((image, index) => (
+              <button type="button" onClick={() => { setSelectedIndex(index); trackEvent('gallery_photo_open', { photo: index + 1 }); }} aria-label={`Perbesar foto ${index + 1}: ${image.alt}`} key={image.src}>
+                <img src={image.src} width={image.width} height={image.height} alt={image.alt} loading="lazy" decoding="async" />
+                <span>{String(index + 1).padStart(2, '0')}</span>
+              </button>
+            ))}
+          </div>
+          <div className="gallery-modal__footer"><span>FMO Wedding Specialist</span><p>Every story, <em>expertly yours.</em></p></div>
+        </div>
+      </section>
+      {selectedImage && (
+        <div className="gallery-lightbox" role="dialog" aria-modal="true" aria-label={`Foto ${selectedIndex + 1} dari ${fullGalleryImages.length}`} onMouseDown={(event) => event.target === event.currentTarget && setSelectedIndex(null)}>
+          <button className="gallery-lightbox__close" type="button" onClick={() => setSelectedIndex(null)} aria-label="Tutup foto"><HiOutlineXMark /></button>
+          <button className="gallery-lightbox__nav gallery-lightbox__nav--previous" type="button" onClick={showPrevious} aria-label="Foto sebelumnya">←</button>
+          <figure><img src={selectedImage.src} alt={selectedImage.alt} /><figcaption><span>{String(selectedIndex + 1).padStart(3, '0')} / {fullGalleryImages.length}</span>{selectedImage.alt}</figcaption></figure>
+          <button className="gallery-lightbox__nav gallery-lightbox__nav--next" type="button" onClick={showNext} aria-label="Foto berikutnya">→</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function App() {
   const [consultOpen, setConsultOpen] = useState(false);
   const [packagePreset, setPackagePreset] = useState('');
   const [packageModalOpen, setPackageModalOpen] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState('');
   const [legalOpen, setLegalOpen] = useState('');
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
   const openConsult = (preset = '') => {
     setPackagePreset(preset);
@@ -712,15 +829,17 @@ function App() {
         <section className="faq shell" id="faq"><div className="faq__heading"><p className="eyebrow eyebrow--dark">Questions, answered</p><h2>Hal yang sering<br /><em>ditanyakan.</em></h2><p>Belum menemukan jawabanmu? Wedding Specialist kami siap membantu lewat konsultasi personal.</p><button type="button" className="button button--forest" onClick={() => openConsult()}>Tanya specialist <HiArrowUpRight /></button></div><div className="faq__list">{faqs.map(([question, answer], index) => <details key={question} open={index === 0}><summary><span>{String(index + 1).padStart(2, '0')}</span>{question}<HiChevronDown /></summary><p>{answer}</p></details>)}</div></section>
 
         <section className="closing"><div className="closing__image" aria-hidden="true"><img src="/assets/closing-couple-hd.webp" srcSet="/assets/closing-couple-840.webp 840w, /assets/closing-couple-1280.webp 1280w, /assets/closing-couple-hd.webp 1672w" sizes="100vw" alt="" width="1672" height="941" loading="lazy" decoding="async" /></div><div className="closing__veil" /><div className="closing__content shell"><p className="eyebrow">Begin your story</p><h2>Let’s make your day<br /><em>expertly yours.</em></h2><p>Mulai dari obrolan sederhana. Ceritakan impianmu, kami bantu menyusun jalannya.</p><button className="button button--gold" type="button" onClick={() => openConsult()}>Jadwalkan konsultasi <HiArrowUpRight /></button></div></section>
+        <GallerySection onOpen={() => { setGalleryOpen(true); trackEvent('gallery_open'); }} />
       </main>
 
-      <footer><div className="shell footer__top"><div className="footer__brand"><img src="/logo.png?v=20260827b" alt="FMO Wedding Specialist" width="800" height="564" /><p>Wedding planning yang personal, transparan, dan sepenuh hati.</p></div><div><p className="footer__label">Explore</p><a href="#about">Tentang FMO</a><a href="#workflow">Workflow</a><a href="#guardian">Wedding Day Guardian</a><a href="#packages">Packages</a><a href="#real-weddings">Selected celebrations</a><a href="#services">Other services</a><a href="#faq">FAQ</a></div><div><p className="footer__label">Connect</p><a href="https://instagram.com/fmo_weddingspecialist" target="_blank" rel="noreferrer"><FaInstagram /> Instagram</a><a href="https://tiktok.com/@fmo_weddingspecialist" target="_blank" rel="noreferrer"><FaTiktok /> TikTok</a><a href="https://wa.me/6281221212877" target="_blank" rel="noreferrer"><FaWhatsapp /> WhatsApp</a></div><div><p className="footer__label">Information</p><p>Bandung, West Java<br />Available beyond the city.</p><button type="button" onClick={() => setLegalOpen('privacy')}>Privacy Policy</button><button type="button" onClick={() => setLegalOpen('terms')}>Terms of Use</button></div></div><div className="shell footer__bottom"><span>© {new Date().getFullYear()} FMO Wedding Specialist</span><span>expertly <em>yours.</em></span></div></footer>
+      <footer><div className="shell footer__top"><div className="footer__brand"><img src="/logo.png?v=20260827b" alt="FMO Wedding Specialist" width="800" height="564" /><p>Wedding planning yang personal, transparan, dan sepenuh hati.</p></div><div><p className="footer__label">Explore</p><a href="#about">Tentang FMO</a><a href="#workflow">Workflow</a><a href="#guardian">Wedding Day Guardian</a><a href="#packages">Packages</a><a href="#real-weddings">Selected celebrations</a><a href="#services">Other services</a><a href="#gallery">Galeri</a><a href="#faq">FAQ</a></div><div><p className="footer__label">Connect</p><a href="https://instagram.com/fmo_weddingspecialist" target="_blank" rel="noreferrer"><FaInstagram /> Instagram</a><a href="https://tiktok.com/@fmo_weddingspecialist" target="_blank" rel="noreferrer"><FaTiktok /> TikTok</a><a href="https://wa.me/6281221212877" target="_blank" rel="noreferrer"><FaWhatsapp /> WhatsApp</a></div><div><p className="footer__label">Information</p><p>Bandung, West Java<br />Available beyond the city.</p><button type="button" onClick={() => setLegalOpen('privacy')}>Privacy Policy</button><button type="button" onClick={() => setLegalOpen('terms')}>Terms of Use</button></div></div><div className="shell footer__bottom"><span>© {new Date().getFullYear()} FMO Wedding Specialist</span><span>expertly <em>yours.</em></span></div></footer>
 
       <AudioControl />
       <button className="floating-consult" type="button" onClick={() => openConsult()} aria-label="Buka konsultasi"><FaWhatsapp /><span>Konsultasi</span></button>
       {consultOpen && <Consultation isOpen onClose={() => setConsultOpen(false)} preset={packagePreset} />}
       {packageModalOpen && <PackageModal isOpen onClose={() => setPackageModalOpen(false)} packageSize={selectedPackage} onConsult={openConsult} />}
       {legalOpen && <LegalModal type={legalOpen} onClose={() => setLegalOpen('')} />}
+      {galleryOpen && <GalleryModal onClose={() => setGalleryOpen(false)} />}
     </>
   );
 }
