@@ -739,7 +739,7 @@ function App() {
       <Header onConsult={() => openConsult()} onPackage={openPackage} />
       <main id="main-content">
         <section className="hero" id="home">
-          <div className="hero__image" aria-hidden="true"><img src="/assets/hero-wedding-hd.webp" srcSet="/assets/hero-wedding-840.webp 840w, /assets/hero-wedding-1280.webp 1280w, /assets/hero-wedding-hd.webp 1672w" sizes="100vw" alt="" width="1672" height="941" fetchPriority="high" decoding="async" /></div><div className="hero__veil" />
+          <div className="hero__image" aria-hidden="true"><img src="/assets/hero-hari-bahagia-hd.webp" srcSet="/assets/hero-hari-bahagia-840.webp 840w, /assets/hero-hari-bahagia-1280.webp 1280w, /assets/hero-hari-bahagia-hd.webp 1920w" sizes="100vw" alt="" width="1920" height="1280" fetchPriority="high" decoding="async" /></div><div className="hero__veil" />
           <div className="hero__content shell">
             <p className="eyebrow">Wedding planning · Bandung & beyond</p>
             <h1>Hari bahagiamu,<br /><em>expertly yours.</em></h1>
