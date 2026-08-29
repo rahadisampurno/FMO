@@ -216,17 +216,13 @@ function Header({ onConsult, onPackage }) {
 function AudioControl() {
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
-  const [entered, setEntered] = useState(() => window.sessionStorage.getItem('fmo-entered') === '1');
+  const [stage, setStage] = useState('welcome');
   const [leaving, setLeaving] = useState(false);
+  const entered = stage === 'entered';
 
   useEffect(() => {
     document.body.classList.toggle('entry-lock', !entered);
     return () => document.body.classList.remove('entry-lock');
-  }, [entered]);
-
-  useEffect(() => {
-    if (!entered || window.localStorage.getItem('fmo-music') !== 'on') return;
-    audioRef.current?.play().catch(() => setPlaying(false));
   }, [entered]);
 
   const enterWebsite = async () => {
@@ -235,10 +231,18 @@ function AudioControl() {
       await audioRef.current?.play();
       window.localStorage.setItem('fmo-music', 'on');
     } catch { window.localStorage.setItem('fmo-music', 'off'); }
-    window.sessionStorage.setItem('fmo-entered', '1');
     trackEvent('website_enter', { music: audioRef.current?.paused ? 'off' : 'on' });
     setLeaving(true);
-    window.setTimeout(() => setEntered(true), 650);
+    window.setTimeout(() => {
+      setLeaving(false);
+      setStage('consultation');
+    }, 650);
+  };
+
+  const completeOnboarding = (form) => {
+    try { window.sessionStorage.setItem('fmo-consultation-profile', JSON.stringify(form)); } catch { /* The gate still works when browser storage is unavailable. */ }
+    trackEvent('onboarding_complete', { city: form.city, event: form.event });
+    setStage('entered');
   };
 
   const toggle = async () => {
@@ -259,7 +263,7 @@ function AudioControl() {
   return (
     <>
       <audio ref={audioRef} loop src="/music/Sebusur%20Pelangi.mp3" preload="metadata" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} />
-      {!entered && (
+      {stage === 'welcome' && (
         <div className={`entry-screen ${leaving ? 'entry-screen--leaving' : ''}`} role="dialog" aria-modal="true" aria-label="Selamat datang di FMO Wedding Specialist">
           <div className="entry-screen__content">
             <img src="/logo.png?v=20260827b" alt="FMO Wedding Specialist" width="800" height="564" />
@@ -267,6 +271,7 @@ function AudioControl() {
           </div>
         </div>
       )}
+      {stage === 'consultation' && <Consultation isOpen required onComplete={completeOnboarding} />}
       {entered && (
         <button className="audio-control" type="button" onClick={toggle} aria-label={playing ? 'Hentikan musik' : 'Putar musik'}>
           {playing ? <FaVolumeHigh /> : <FaVolumeXmark />}
@@ -397,7 +402,7 @@ function FeatureCarousel() {
   );
 }
 
-function Consultation({ isOpen, onClose, preset }) {
+function Consultation({ isOpen, onClose, preset = '', required = false, onComplete }) {
   const contextLabel = preset ? (/^\d+$/.test(preset) ? `Paket ${Number(preset).toLocaleString('id-ID')} pax` : preset) : '';
   const totalSteps = contextLabel ? 3 : 4;
   const [step, setStep] = useState(1);
@@ -410,14 +415,14 @@ function Consultation({ isOpen, onClose, preset }) {
 
   useEffect(() => {
     if (!isOpen) return undefined;
-    const onKey = (event) => event.key === 'Escape' && onClose();
+    const onKey = (event) => event.key === 'Escape' && !required && onClose?.();
     document.addEventListener('keydown', onKey);
     document.body.classList.add('modal-lock');
     return () => {
       document.removeEventListener('keydown', onKey);
       document.body.classList.remove('modal-lock');
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, required]);
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
   useEffect(() => {
@@ -476,13 +481,18 @@ function Consultation({ isOpen, onClose, preset }) {
     window.open(`https://wa.me/6281221212877?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
   };
 
+  const finishOnboarding = () => {
+    trackEvent('consultation_brief_complete', { context: form.event || 'general', city: form.city });
+    onComplete?.(form);
+  };
+
   if (!isOpen) return null;
   return (
-    <div className="consult-overlay" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <section className="consult" role="dialog" aria-modal="true" aria-labelledby="consult-title">
+    <div className={`consult-overlay ${required ? 'consult-overlay--required' : ''}`} onMouseDown={(event) => event.target === event.currentTarget && !required && onClose?.()}>
+      <section className={`consult ${required ? 'consult--required' : ''}`} role="dialog" aria-modal="true" aria-labelledby="consult-title">
         <header className="consult__header">
-          <div><span className="status-dot" /><p id="consult-title">FMO Consultation</p><small>Wedding specialist online</small></div>
-          <button type="button" onClick={onClose} aria-label="Tutup konsultasi" autoFocus><HiOutlineXMark /></button>
+          <div><span className="status-dot" /><p id="consult-title">FMO Consultation</p><small>{required ? 'Lengkapi brief untuk memasuki website' : 'Wedding specialist online'}</small></div>
+          {!required && <button type="button" onClick={onClose} aria-label="Tutup konsultasi" autoFocus><HiOutlineXMark /></button>}
         </header>
         <div className="consult__progress">
           <div><span>Brief awal</span><strong>{progressStep} / {totalSteps}</strong></div>
@@ -493,7 +503,7 @@ function Consultation({ isOpen, onClose, preset }) {
           {messages.map((message, index) => <p className={`message message--${message.sender}`} key={`${message.sender}-${index}`}>{message.text}</p>)}
           {step === 1 && <div className="quick-options">{['Bandung', 'Cimahi', 'Bandung Barat', 'Kota lain'].map((city) => <button key={city} type="button" onClick={() => selectCity(city)}>{city}</button>)}</div>}
           {step === 2 && <div className="quick-options">{['Akad di masjid', 'Intimate · ≤250 tamu', 'Akad & resepsi · 250–500', 'Grand · ±1.000 tamu'].map((event) => <button key={event} type="button" onClick={() => selectEvent(event)}>{event}</button>)}</div>}
-          {step === 5 && <div className="consult__summary"><span>Ringkasan konsultasi</span><dl><div><dt>Kota</dt><dd>{form.city}</dd></div><div><dt>Acara</dt><dd>{form.event}</dd></div><div><dt>Waktu</dt><dd>{form.date}</dd></div><div><dt>Venue</dt><dd>{form.venue}</dd></div></dl><button className="whatsapp-button" type="button" onClick={sendWhatsApp}><FaWhatsapp /> Lanjut ke WhatsApp</button></div>}
+          {step === 5 && <div className="consult__summary"><span>Ringkasan konsultasi</span><dl><div><dt>Kota</dt><dd>{form.city}</dd></div><div><dt>Acara</dt><dd>{form.event}</dd></div><div><dt>Waktu</dt><dd>{form.date}</dd></div><div><dt>Venue</dt><dd>{form.venue}</dd></div></dl>{required ? <button className="whatsapp-button" type="button" onClick={finishOnboarding}>Masuk ke website <HiArrowUpRight /></button> : <button className="whatsapp-button" type="button" onClick={sendWhatsApp}><FaWhatsapp /> Lanjut ke WhatsApp</button>}</div>}
           <div ref={endRef} />
         </div>
         {(step === 3 || step === 4) && <form className="consult__input" onSubmit={submitText}><label className="sr-only" htmlFor="consult-message">Balasan</label><input id="consult-message" autoFocus maxLength="120" value={input} onChange={(event) => setInput(event.target.value)} placeholder={step === 3 ? 'Contoh: Desember 2026' : 'Nama venue atau “Belum ada”'} /><button type="submit" disabled={!input.trim()} aria-label="Kirim balasan"><HiArrowUpRight /></button></form>}
