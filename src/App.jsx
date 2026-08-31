@@ -1,6 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+'use client';
+
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FaInstagram, FaTiktok, FaWhatsapp, FaVolumeHigh, FaVolumeXmark } from 'react-icons/fa6';
 import { HiArrowDownRight, HiArrowUpRight, HiCheck, HiChevronDown, HiOutlineXMark } from 'react-icons/hi2';
+import { defaultContent, mergeSiteContent } from './content';
+
+const SiteContentContext = createContext(defaultContent);
+const useSiteContent = () => useContext(SiteContentContext);
 
 const workflow = [
   ['01', 'Konsultasi awal', 'Bersama Customer Service.', 10, 10],
@@ -15,84 +21,6 @@ const workflow = [
   ['10', 'Pendalaman konsep', 'Bersama Wedding Specialist.', 25, 88],
 ];
 
-const preparation = [
-  ['Bride & Groom Meeting', 'Menyelaraskan visi, prioritas, dan keputusan bersama.'],
-  ['Attire Fitting', 'Koordinasi ukuran, fitting, dan finalisasi busana.'],
-  ['Moodboard Photo & Video', 'Menyusun arah visual untuk dokumentasi hari bahagia.'],
-  ['Moodboard Decoration', 'Menerjemahkan karakter pasangan menjadi ruang perayaan.'],
-  ['Food Tasting', 'Kurasi menu dan pengalaman jamuan untuk para tamu.'],
-  ['Family Meeting', 'Menyatukan kebutuhan keluarga dan detail protokoler.'],
-  ['Technical Meeting', 'Sinkronisasi seluruh vendor, venue, dan alur acara.'],
-  ['Wedding Day', 'Satu tim, satu pasangan, dan total focus sepanjang hari.'],
-];
-
-const guardianRoles = {
-  family: [
-    ['Stage Manager', 'Mengarahkan pasangan, keluarga, dan pelaku acara di setiap rangkaian hingga sesi foto pelaminan.'],
-    ["Family LO's", 'Menjadi penghubung utama antara keluarga besar, panitia keluarga, dan seluruh vendor.'],
-    ['Checker', 'Memastikan jumlah tamu, suvenir, undangan VIP, hidangan, dan detail hitungan acara tetap akurat.'],
-    ['Catering Checker', 'Mengantar dan mengatur tamu VIP saat bersalaman, berfoto, hingga menuju area bersantap.'],
-    ['Queue Coordinator', 'Menjaga antrean salam dan foto tetap rapi, lancar, dan tidak menumpuk.'],
-    ['VIP Concierge', 'Mendampingi tamu VIP menuju pelaminan dan area khusus dengan pelayanan personal.'],
-  ],
-  vendors: [
-    ['Bride Assistant', 'Menjadi pendamping pribadi yang membantu kebutuhan pengantin dan menjaga ketenangan sepanjang acara.'],
-    ['Frontliner', 'Menjadi pusat informasi di area penerima tamu sekaligus membantu tim usher mengatur kedatangan.'],
-    ['Area Controller', 'Memastikan pelaminan, buffet, area duduk, dan seluruh zona acara selalu tertata.'],
-    ['Photo Registrator', 'Mengatur antrean tamu yang ingin berfoto bersama agar sesi dokumentasi tersusun rapi.'],
-    ['MC Advisor', 'Memastikan konsep dan alur acara dipahami MC secara utuh sebelum eksekusi.'],
-    ['Content Creator', 'Mendokumentasikan momen-momen acara dalam konten real-time yang tetap selaras dengan cerita pernikahanmu.'],
-  ],
-};
-
-const otherServices = [
-  { id: '01', title: 'Engagement Event', label: 'Engagement', image: '/assets/page_20_img_1.jpeg', alt: 'Pasangan merayakan pertunangan', copy: 'Pengarahan acara lamaran atau engagement yang hangat, personal, dan memorable.' },
-  { id: '02', title: 'Pengajian & Siraman', label: 'Pengajian · Siraman', image: '/assets/page_20_img_2.jpeg', alt: 'Prosesi pengajian dan siraman menjelang pernikahan', copy: 'Acara pra-nikah yang tertata, khidmat, dan penuh makna sesuai adat serta kebutuhan keluarga.' },
-  { id: '03', title: 'After Party', label: 'After party', image: '/assets/page_20_img_3.jpeg', alt: 'Pasangan menikmati after party pernikahan', copy: 'Perayaan setelah akad dan resepsi untuk menikmati momen yang lebih lepas bersama orang-orang terdekat.' },
-  { id: '04', title: 'Pre-wedding Companion', label: 'Pre-wedding', image: '/assets/page_20_img_4.jpeg', alt: 'Pasangan menjalani sesi pre-wedding di alam terbuka', copy: 'Pendamping pribadi yang membantu kebutuhan dan keputusan kecil agar sesi pre-wedding terasa lebih ringan.' },
-];
-
-const selectedMoments = [
-  { id: '01', title: 'Intimate celebration', label: 'Personal & meaningful', image: '/assets/promise-couple-hd.webp', alt: 'Pasangan merayakan momen pertunangan yang intim', copy: 'Perayaan yang mengutamakan kedekatan, detail personal, dan pengalaman hangat bersama orang-orang terdekat.' },
-  { id: '02', title: 'Classic wedding', label: 'Timeless & composed', image: '/assets/hero-wedding-hd.webp', alt: 'Pasangan pengantin FMO dalam perayaan bernuansa klasik', copy: 'Rangkaian hari bahagia yang tertata rapi dengan visual klasik, alur tenang, dan koordinasi yang menyeluruh.' },
-  { id: '03', title: 'Joyful gathering', label: 'Warm & expressive', image: '/assets/closing-couple-hd.webp', alt: 'Pasangan pengantin menikmati perayaan bersama tamu', copy: 'Perayaan penuh energi yang tetap terasa personal karena setiap momen dan perpindahan acara telah dipersiapkan.' },
-];
-
-const galleryImages = [
-  { src: '/gallery/fmo-gallery-01.webp', width: 1200, height: 1800, alt: 'Pasangan pengantin duduk di pelaminan dengan rangkaian bunga berwarna hangat' },
-  { src: '/gallery/fmo-gallery-02.webp', width: 1202, height: 1800, alt: 'Pasangan pengantin mengenakan busana adat Jawa tersenyum bersama' },
-  { src: '/gallery/fmo-gallery-03.webp', width: 1600, height: 1067, alt: 'Siluet pasangan pengantin saling meraih tangan' },
-  { src: '/gallery/fmo-gallery-04.webp', width: 1600, height: 1067, alt: 'Pasangan pengantin berdiri di bawah pepohonan dalam suasana modern' },
-  { src: '/gallery/fmo-gallery-05.webp', width: 1600, height: 1067, alt: 'Suasana prosesi pernikahan yang tertata bersama keluarga' },
-  { src: '/gallery/fmo-gallery-06.webp', width: 1600, height: 1067, alt: 'Pengantin pria dan sahabat menikmati momen perayaan' },
-  { src: '/gallery/fmo-gallery-07.webp', width: 1200, height: 1800, alt: 'Potret pengantin pria mengenakan busana adat' },
-  { src: '/gallery/fmo-gallery-08.webp', width: 1200, height: 1800, alt: 'Orang tua membantu mempersiapkan busana pengantin pria' },
-  { src: '/gallery/fmo-gallery-09.webp', width: 1600, height: 1069, alt: 'Detail pengantin wanita dalam busana adat putih' },
-  { src: '/gallery/fmo-gallery-10.webp', width: 1200, height: 1800, alt: 'Detail pasangan pengantin dengan buket bunga putih' },
-  { src: '/gallery/fmo-gallery-11.webp', width: 1200, height: 1800, alt: 'Detail busana adat pengantin pria dalam nuansa hitam putih' },
-  { src: '/gallery/fmo-gallery-12.webp', width: 1600, height: 1067, alt: 'Pasangan pengantin berfoto bersama tim FMO Wedding Specialist' },
-  { src: '/gallery/fmo-gallery-13.webp', width: 1200, height: 1800, alt: 'Pengantin pria berbicara bersama keluarga saat prosesi akad' },
-  { src: '/gallery/fmo-gallery-14.webp', width: 1600, height: 1067, alt: 'Prosesi pernikahan dengan tradisi kehormatan militer' },
-  { src: '/gallery/fmo-gallery-15.webp', width: 1600, height: 1067, alt: 'Tim FMO melakukan pengecekan terakhir sebelum acara dimulai' },
-  { src: '/gallery/fmo-gallery-16.webp', width: 1600, height: 1067, alt: 'Momen hangat pasangan pengantin bersama keluarga' },
-  { src: '/gallery/fmo-gallery-17.webp', width: 1600, height: 1069, alt: 'Pasangan pengantin menikmati perayaan bersama para tamu' },
-  { src: '/gallery/fmo-gallery-18.webp', width: 1600, height: 1067, alt: 'Detail dekorasi dan rangkaian bunga pernikahan' },
-  { src: '/gallery/fmo-gallery-19.webp', width: 1600, height: 1069, alt: 'Pasangan pengantin dalam momen candid yang penuh kebahagiaan' },
-  { src: '/gallery/fmo-gallery-20.webp', width: 1202, height: 1800, alt: 'Potret pengantin wanita menjelang prosesi pernikahan' },
-];
-
-const fullGalleryImages = Array.from({ length: 174 }, (_, index) => ({
-  src: `/gallery/full/fmo-${String(index + 1).padStart(3, '0')}.webp`,
-  alt: `Dokumentasi perayaan FMO ${String(index + 1).padStart(3, '0')}`,
-}));
-
-const packageComparison = [
-  ['Guest scale', 'Up to 100', 'Up to 350', 'Up to 500', 'Up to 1.000'],
-  ['Best for', 'Intimate moments', 'Signature celebration', 'Larger celebration', 'Grand-scale event'],
-  ['Planning support', 'Essential', 'Full assistance', 'End-to-end', 'Full specialist team'],
-  ['Vendor coordination', 'Curated essentials', 'Curated vendor team', 'Multi-vendor', 'Multi-vendor operation'],
-  ['Wedding day management', 'Included', 'Included', 'Included', 'Included'],
-];
 
 const legalContent = {
   privacy: {
@@ -124,22 +52,86 @@ function trackEvent(name, detail = {}) {
   window.dispatchEvent(new CustomEvent('fmo:analytics', { detail: { name, ...detail } }));
 }
 
+const consultationEndpoint =
+  import.meta.env.VITE_FMO_LEADS_ENDPOINT?.trim() ||
+  'https://script.google.com/macros/s/AKfycbxG8rv0SrQhywcIMKFPP8yxHEudP_ibakIHPU5rDBYNwR1FeAKvxRJOvlLJ0A_-j-cH9Q/exec';
+
+const consultationProfileKey = 'fmo-consultation-profile';
+
+function isCompleteConsultationProfile(profile) {
+  return profile && ['city', 'event', 'date', 'venue', 'phone'].every((field) => typeof profile[field] === 'string' && profile[field].trim());
+}
+
+function getStoredConsultationProfile() {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const savedProfile = JSON.parse(window.localStorage.getItem(consultationProfileKey) || 'null');
+    if (isCompleteConsultationProfile(savedProfile)) return savedProfile;
+
+    // Migrate visitors who completed the form before persistent storage was enabled.
+    const sessionProfile = JSON.parse(window.sessionStorage.getItem(consultationProfileKey) || 'null');
+    if (!isCompleteConsultationProfile(sessionProfile)) return null;
+    window.localStorage.setItem(consultationProfileKey, JSON.stringify(sessionProfile));
+    return sessionProfile;
+  } catch {
+    return null;
+  }
+}
+
+function getRecommendedPackageId(profile) {
+  const savedPreference = profile?.packagePreferenceId;
+  if (packageOptions.some((item) => item.id === savedPreference)) return savedPreference;
+
+  const event = profile?.event?.toLowerCase() || '';
+  if (event.includes('masjid')) return 'Akad di Masjid';
+  if (event.includes('1.000') || event.includes('1000') || event.includes('grand')) return '1000';
+  if (event.includes('250–500') || event.includes('250-500')) return '500';
+  if (event.includes('≤250') || event.includes('intimate')) return '350';
+
+  const guestCounts = [...event.matchAll(/\d[\d.]*/g)]
+    .map(([value]) => Number(value.replaceAll('.', '')))
+    .filter(Number.isFinite);
+  const guestTarget = Math.max(0, ...guestCounts);
+  return [['100', 100], ['350', 350], ['500', 500], ['1000', 1000]]
+    .find(([, capacity]) => guestTarget <= capacity)?.[0] || '1000';
+}
+
+function createSubmissionId() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+  return `fmo-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+async function saveConsultationLead(form, submissionId) {
+  if (!consultationEndpoint) throw new Error('endpoint_not_configured');
+
+  const response = await fetch(consultationEndpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({
+      submissionId,
+      city: form.city,
+      event: form.event,
+      date: form.date,
+      venue: form.venue,
+      phone: form.phone,
+      source: 'website-entry',
+      submittedAt: new Date().toISOString(),
+    }),
+  });
+
+  if (!response.ok) throw new Error(`request_failed_${response.status}`);
+  const result = await response.json().catch(() => ({ ok: true }));
+  if (result.ok === false) throw new Error(result.error || 'save_failed');
+  return result;
+}
+
 const packageOptions = [
+  { id: 'Akad di Masjid', kicker: 'A meaningful beginning', title: 'Akad di Masjid', note: 'Prosesi sakral yang khidmat, hangat, dan tertata.', features: ['Mosque ceremony planning', 'Hampers or dine-in option', 'Family coordination', 'Wedding day management'] },
   { id: '100', guests: '100', title: 'Intimate', note: 'Hangat, personal, dan penuh makna.', features: ['Venue & catering', 'Decoration & styling', 'Documentation', 'Wedding organizer'] },
-  { id: '350', guests: '350', title: 'Signature', note: 'Perayaan lengkap dengan detail yang terasa personal.', features: ['Curated vendor team', 'Full planning assistance', 'Guest experience', 'Wedding day management'], featured: true },
+  { id: '350', guests: '350', title: 'Signature', note: 'Perayaan lengkap dengan detail yang terasa personal.', features: ['Curated vendor team', 'Full planning assistance', 'Guest experience', 'Wedding day management'] },
   { id: '500', guests: '500', title: 'Celebration', note: 'Dirancang untuk perayaan besar yang tetap terasa intim.', features: ['Venue & catering', 'Custom decoration', 'Entertainment', 'End-to-end coordination'] },
   { id: '1000', guests: '1.000', title: 'Grand', note: 'Skala besar, sistematis, dan tetap effortless.', features: ['Multi-vendor operation', 'Guest flow management', 'Technical production', 'Full specialist team'] },
-];
-
-const packageNavOptions = [['100', '100 pax'], ['350', '350 pax'], ['500', '500 pax'], ['1000', '1000 pax'], ['Akad di Masjid', 'Akad di Masjid']];
-
-const faqs = [
-  ['Apakah aku bisa memilih vendor di luar list FMO?', 'Bisa. Pernikahan ini tentang ceritamu. Di private consultation session, kami akan membantu kurasi, kalkulasi, serta menjabarkan setiap selisih harga secara transparan—tanpa biaya tersembunyi.'],
-  ['Bisakah paket ditambah layanan khusus?', 'Tentu. Kirab adat, photobooth, wedding effect, atau kebutuhan personal lain dapat diracik sesuai konsep dan prioritas perayaanmu.'],
-  ['Bagaimana sistem termin pembayarannya?', 'Kami menyediakan Flexi Installment Plan hingga 4 kali pembayaran dan Smart Express Plan dalam 2 kali pembayaran. Skema akan disesuaikan dengan timeline dan cash flow-mu.'],
-  ['Ke mana pembayaran dilakukan?', 'Kamu dapat memilih one-gate payment melalui manajemen FMO atau direct payment ke vendor. Semua pembayaran selalu dilengkapi invoice resmi.'],
-  ['Apakah FMO menerima dua acara dalam sehari?', 'Tidak. Prinsip kami adalah 1 Day, 1 Client. Seluruh energi dan fokus tim inti didedikasikan hanya untuk satu pasangan pada hari tersebut.'],
-  ['Apakah FMO melayani di luar Bandung?', 'Ya. Ceritakan kota dan rencana venue-mu saat konsultasi; tim kami akan memetakan kebutuhan perjalanan serta operasionalnya.'],
 ];
 
 const featureSlides = [
@@ -174,6 +166,7 @@ const featureSlides = [
 const chatIntro = { sender: 'bot', text: 'Halo Kak! Selamat atas rencana hari bahagianya. 🤍\n\nKira-kira, pernikahannya akan dilaksanakan di daerah mana?' };
 
 function Header({ onConsult, onPackage }) {
+  const { packages } = useSiteContent();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [packagesOpen, setPackagesOpen] = useState(false);
@@ -229,7 +222,7 @@ function Header({ onConsult, onPackage }) {
         <div className="nav-packages">
           <button className="nav-packages__trigger" type="button" onClick={togglePackages} aria-expanded={packagesOpen} aria-haspopup="menu">Packages <HiChevronDown /></button>
           <div className={`nav-packages__menu ${packagesOpen ? 'is-open' : ''}`} role="menu">
-            {packageNavOptions.map(([value, label]) => <button type="button" role="menuitem" onClick={() => openPackage(value)} key={value}>{label}</button>)}
+            {packages.filter((item) => item.active).map((item) => <button type="button" role="menuitem" onClick={() => openPackage(item.id)} key={item.id}>{item.title}</button>)}
           </div>
         </div>
         <a href="#workflow" onClick={navigate}>Workflow</a>
@@ -241,10 +234,11 @@ function Header({ onConsult, onPackage }) {
   );
 }
 
-function AudioControl() {
+function AudioControl({ onProfileSaved }) {
+  const { business } = useSiteContent();
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
-  const [stage, setStage] = useState('welcome');
+  const [stage, setStage] = useState(() => getStoredConsultationProfile() ? 'entered' : 'welcome');
   const [leaving, setLeaving] = useState(false);
   const entered = stage === 'entered';
 
@@ -255,10 +249,12 @@ function AudioControl() {
 
   const enterWebsite = async () => {
     if (leaving) return;
-    try {
-      await audioRef.current?.play();
-      window.localStorage.setItem('fmo-music', 'on');
-    } catch { window.localStorage.setItem('fmo-music', 'off'); }
+    if (business.musicEnabled) {
+      try {
+        await audioRef.current?.play();
+        window.localStorage.setItem('fmo-music', 'on');
+      } catch { window.localStorage.setItem('fmo-music', 'off'); }
+    }
     trackEvent('website_enter', { music: audioRef.current?.paused ? 'off' : 'on' });
     setLeaving(true);
     window.setTimeout(() => {
@@ -268,7 +264,15 @@ function AudioControl() {
   };
 
   const completeOnboarding = (form) => {
-    try { window.sessionStorage.setItem('fmo-consultation-profile', JSON.stringify(form)); } catch { /* The gate still works when browser storage is unavailable. */ }
+    try {
+      window.localStorage.setItem(consultationProfileKey, JSON.stringify({
+        ...form,
+        completedAt: new Date().toISOString(),
+        version: 1,
+      }));
+      window.sessionStorage.removeItem(consultationProfileKey);
+    } catch { /* The gate still works when browser storage is unavailable. */ }
+    onProfileSaved?.(form);
     trackEvent('onboarding_complete', { city: form.city, event: form.event });
     setStage('entered');
   };
@@ -290,7 +294,7 @@ function AudioControl() {
 
   return (
     <>
-      <audio ref={audioRef} loop src="/music/Sebusur%20Pelangi.mp3" preload="metadata" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} />
+      <audio ref={audioRef} loop src={business.music} preload="metadata" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} />
       {stage === 'welcome' && (
         <div className={`entry-screen ${leaving ? 'entry-screen--leaving' : ''}`} role="dialog" aria-modal="true" aria-label="Selamat datang di FMO Wedding Specialist">
           <div className="entry-screen__content">
@@ -300,7 +304,7 @@ function AudioControl() {
         </div>
       )}
       {stage === 'consultation' && <Consultation isOpen required onComplete={completeOnboarding} />}
-      {entered && (
+      {entered && business.musicEnabled && (
         <button className="audio-control" type="button" onClick={toggle} aria-label={playing ? 'Hentikan musik' : 'Putar musik'}>
           {playing ? <FaVolumeHigh /> : <FaVolumeXmark />}
           <span>{playing ? 'Music on' : 'Music off'}</span>
@@ -310,11 +314,11 @@ function AudioControl() {
   );
 }
 
-function PackageCard({ item, onOpen }) {
+function PackageCard({ item, onOpen, featured = false }) {
   return (
-    <article className={`package-card ${item.featured ? 'package-card--featured' : ''}`}>
-      {item.featured && <span className="package-card__badge">Most selected</span>}
-      <p className="package-card__kicker">Up to <strong>{item.guests}</strong> guests</p>
+    <article className={`package-card ${featured ? 'package-card--featured' : ''}`}>
+      {featured && <span className="package-card__badge">Most selected</span>}
+      <p className="package-card__kicker">{item.kicker || <>Up to <strong>{item.guests}</strong> guests</>}</p>
       <h3>{item.title}</h3>
       <p className="package-card__note">{item.note}</p>
       <ul>{item.features.map((feature) => <li key={feature}><HiCheck /> {feature}</li>)}</ul>
@@ -324,26 +328,70 @@ function PackageCard({ item, onOpen }) {
 }
 
 function PackageComparison({ onOpen }) {
+  const { packages } = useSiteContent();
+  const visiblePackages = packages.filter((item) => item.active);
   return (
     <div className="package-comparison" aria-labelledby="package-comparison-title">
       <div className="package-comparison__heading"><div><p className="eyebrow eyebrow--dark">Compare at a glance</p><h3 id="package-comparison-title">Temukan titik awal yang paling relevan.</h3></div><p>Setiap paket tetap dapat dipersonalisasi melalui private consultation bersama tim FMO.</p></div>
       <div className="package-comparison__scroll" tabIndex="0" aria-label="Tabel perbandingan paket, dapat digulir horizontal">
         <table>
-          <caption className="sr-only">Perbandingan empat paket FMO berdasarkan kapasitas dan cakupan pendampingan</caption>
-          <thead><tr><th scope="col">Focus</th>{packageOptions.map((item) => <th scope="col" key={item.id}>{item.title}<button type="button" onClick={() => onOpen(item.id)}>View package <HiArrowUpRight /></button></th>)}</tr></thead>
-          <tbody>{packageComparison.map(([label, ...values]) => <tr key={label}><th scope="row">{label}</th>{values.map((value, index) => <td key={`${label}-${packageOptions[index].id}`}>{label === 'Wedding day management' && <HiCheck aria-hidden="true" />} {value}</td>)}</tr>)}</tbody>
+          <caption className="sr-only">Perbandingan lima paket FMO berdasarkan kapasitas dan cakupan pendampingan</caption>
+          <thead><tr><th scope="col">Focus</th>{visiblePackages.map((item) => <th scope="col" key={item.id}>{item.title}<button type="button" onClick={() => onOpen(item.id)}>View package <HiArrowUpRight /></button></th>)}</tr></thead>
+          <tbody>
+            <tr><th scope="row">Guest scale</th>{visiblePackages.map((item) => <td key={`guests-${item.id}`}>{item.guests ? `Up to ${item.guests}` : 'Flexible'}</td>)}</tr>
+            <tr><th scope="row">Best for</th>{visiblePackages.map((item) => <td key={`best-${item.id}`}>{item.note}</td>)}</tr>
+            <tr><th scope="row">Included highlights</th>{visiblePackages.map((item) => <td key={`features-${item.id}`}>{item.features.slice(0, 2).join(' · ')}</td>)}</tr>
+            <tr><th scope="row">Wedding day management</th>{visiblePackages.map((item) => <td key={`management-${item.id}`}><HiCheck aria-hidden="true" /> {item.features.some((feature) => feature.toLowerCase().includes('management')) ? 'Included' : 'Available'}</td>)}</tr>
+          </tbody>
         </table>
       </div>
     </div>
   );
 }
 
+function PackagePreferenceModal({ currentPackageId, onClose, onSelect }) {
+  const { packages } = useSiteContent();
+  useEffect(() => {
+    const onKey = (event) => event.key === 'Escape' && onClose();
+    document.addEventListener('keydown', onKey);
+    document.body.classList.add('modal-lock');
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.classList.remove('modal-lock');
+    };
+  }, [onClose]);
+
+  return (
+    <div className="preference-overlay" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <section className="preference-modal" role="dialog" aria-modal="true" aria-labelledby="preference-title">
+        <header>
+          <div><span>Personalized starting point</span><h2 id="preference-title">Ubah preferensi paket</h2></div>
+          <button type="button" onClick={onClose} aria-label="Tutup pilihan preferensi"><HiOutlineXMark /></button>
+        </header>
+        <p>Pilih skala acara terbaru. Rekomendasi akan disimpan di browser ini dan badge <strong>Most selected</strong> langsung diperbarui.</p>
+        <div className="preference-options">
+          {packages.filter((item) => item.active).map((item) => ({ id: item.id, label: item.title, note: item.guests ? `Hingga ${item.guests} tamu. ${item.note}` : item.note })).map((option) => (
+            <button className={option.id === currentPackageId ? 'is-selected' : ''} type="button" onClick={() => onSelect(option)} aria-pressed={option.id === currentPackageId} key={option.id}>
+              <span>{option.id === currentPackageId ? 'Pilihan saat ini' : 'Pilih paket'}</span>
+              <strong>{option.label}</strong>
+              <small>{option.note}</small>
+              <HiArrowUpRight />
+            </button>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function SelectedMoments({ onConsult }) {
+  const { stories } = useSiteContent();
+  const visibleStories = stories.filter((story) => story.active);
   return (
     <section className="selected-moments" id="real-weddings">
       <div className="shell">
         <div className="section-heading"><div><p className="eyebrow eyebrow--dark">Selected celebrations</p><h2>Moments with meaning,<br /><em>planned with intention.</em></h2></div><p>Setiap perayaan memiliki skala dan karakter berbeda. Yang tetap sama adalah perhatian pada detail, alur yang tenang, dan pengalaman yang terasa personal.</p></div>
-        <div className="moment-grid">{selectedMoments.map((moment, index) => <article className={index === 1 ? 'moment-card moment-card--wide' : 'moment-card'} key={moment.id}><div className="moment-card__image"><img src={moment.image} alt={moment.alt} loading="lazy" decoding="async" width="900" height="1100" /></div><div className="moment-card__copy"><span>{moment.id} · {moment.label}</span><h3>{moment.title}</h3><p>{moment.copy}</p></div></article>)}</div>
+        <div className="moment-grid">{visibleStories.map((moment, index) => <article className={index === 1 ? 'moment-card moment-card--wide' : 'moment-card'} key={`${moment.title}-${index}`}><div className="moment-card__image"><img src={moment.image} alt={moment.alt} loading="lazy" decoding="async" width="900" height="1100" /></div><div className="moment-card__copy"><span>{String(index + 1).padStart(2, '0')} · {moment.label}</span><h3>{moment.title}</h3><p>{moment.description}</p></div></article>)}</div>
         <div className="selected-moments__cta"><p>Sudah punya gambaran suasana yang ingin diwujudkan?</p><button type="button" className="button button--forest" onClick={() => onConsult('Wedding inspiration')}>Ceritakan inspirasimu <HiArrowUpRight /></button></div>
       </div>
     </section>
@@ -432,12 +480,15 @@ function FeatureCarousel() {
 
 function Consultation({ isOpen, onClose, preset = '', required = false, onComplete }) {
   const contextLabel = preset ? (/^\d+$/.test(preset) ? `Paket ${Number(preset).toLocaleString('id-ID')} pax` : preset) : '';
-  const totalSteps = contextLabel ? 3 : 4;
+  const totalSteps = contextLabel ? 4 : 5;
   const [step, setStep] = useState(1);
   const [progressStep, setProgressStep] = useState(1);
   const [messages, setMessages] = useState([chatIntro]);
-  const [form, setForm] = useState({ city: '', event: contextLabel, date: '', venue: '' });
+  const [form, setForm] = useState({ city: '', event: contextLabel, date: '', venue: '', phone: '' });
   const [input, setInput] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const submissionId = useRef(createSubmissionId());
   const endRef = useRef(null);
   const timers = useRef([]);
 
@@ -495,23 +546,48 @@ function Consultation({ isOpen, onClose, preset = '', required = false, onComple
       setStep(0);
       setProgressStep(contextLabel ? 3 : 4);
       replyLater('Apakah sudah ada venue impian? Ketik nama venue, atau jawab “Belum ada”.', 4);
-    } else {
+    } else if (step === 4) {
       setForm((current) => ({ ...current, venue: value }));
       setStep(0);
       setProgressStep(totalSteps);
-      replyLater('Terima kasih, Kak. Informasi awalnya sudah lengkap. Yuk lanjutkan bersama Wedding Specialist kami di WhatsApp.', 5);
+      replyLater('Terakhir, boleh tuliskan nomor WhatsApp aktif yang dapat kami hubungi?', 5);
+    } else {
+      const normalizedPhone = value.replace(/[\s()-]/g, '');
+      if (!/^(?:\+62|62|0)8\d{7,12}$/.test(normalizedPhone)) {
+        setInput(value);
+        setMessages((current) => [...current, { sender: 'bot', text: 'Nomornya belum terlihat valid. Gunakan format 08xxxxxxxxxx atau +628xxxxxxxxxx.' }]);
+        return;
+      }
+      setForm((current) => ({ ...current, phone: normalizedPhone }));
+      setStep(0);
+      setProgressStep(totalSteps);
+      replyLater('Terima kasih, Kak. Informasi awalnya sudah lengkap dan siap kami simpan dengan aman.', 6);
     }
   };
 
   const sendWhatsApp = () => {
-    const message = `Halo FMO Wedding Specialist,\n\nSaya ingin berkonsultasi tentang rencana pernikahan:\n• Kota: ${form.city}\n• Acara: ${form.event}\n• Tanggal/bulan: ${form.date}\n• Venue: ${form.venue}\n\nMohon panduannya untuk langkah selanjutnya. Terima kasih.`;
+    const message = `Halo FMO Wedding Specialist,\n\nSaya ingin berkonsultasi tentang rencana pernikahan:\n• Kota: ${form.city}\n• Acara: ${form.event}\n• Tanggal/bulan: ${form.date}\n• Venue: ${form.venue}\n• Nomor WhatsApp: ${form.phone}\n\nMohon panduannya untuk langkah selanjutnya. Terima kasih.`;
     trackEvent('consultation_whatsapp', { context: form.event || 'general', city: form.city });
     window.open(`https://wa.me/6281221212877?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
   };
 
-  const finishOnboarding = () => {
-    trackEvent('consultation_brief_complete', { context: form.event || 'general', city: form.city });
-    onComplete?.(form);
+  const finishOnboarding = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+    setSaveError('');
+
+    try {
+      await saveConsultationLead(form, submissionId.current);
+      trackEvent('consultation_brief_complete', { context: form.event || 'general', city: form.city, storage: 'google_sheets' });
+      onComplete?.(form);
+    } catch (error) {
+      const configurationMissing = error instanceof Error && error.message === 'endpoint_not_configured';
+      setSaveError(configurationMissing
+        ? 'Penyimpanan konsultasi belum diaktifkan. Silakan hubungi administrator FMO.'
+        : 'Data belum berhasil tersimpan. Periksa koneksi lalu coba lagi.');
+      trackEvent('consultation_brief_save_failed', { reason: error instanceof Error ? error.message : 'unknown' });
+      setIsSaving(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -531,10 +607,10 @@ function Consultation({ isOpen, onClose, preset = '', required = false, onComple
           {messages.map((message, index) => <p className={`message message--${message.sender}`} key={`${message.sender}-${index}`}>{message.text}</p>)}
           {step === 1 && <div className="quick-options">{['Bandung', 'Cimahi', 'Bandung Barat', 'Kota lain'].map((city) => <button key={city} type="button" onClick={() => selectCity(city)}>{city}</button>)}</div>}
           {step === 2 && <div className="quick-options">{['Akad di masjid', 'Intimate · ≤250 tamu', 'Akad & resepsi · 250–500', 'Grand · ±1.000 tamu'].map((event) => <button key={event} type="button" onClick={() => selectEvent(event)}>{event}</button>)}</div>}
-          {step === 5 && <div className="consult__summary"><span>Ringkasan konsultasi</span><dl><div><dt>Kota</dt><dd>{form.city}</dd></div><div><dt>Acara</dt><dd>{form.event}</dd></div><div><dt>Waktu</dt><dd>{form.date}</dd></div><div><dt>Venue</dt><dd>{form.venue}</dd></div></dl>{required ? <button className="whatsapp-button" type="button" onClick={finishOnboarding}>Masuk ke website <HiArrowUpRight /></button> : <button className="whatsapp-button" type="button" onClick={sendWhatsApp}><FaWhatsapp /> Lanjut ke WhatsApp</button>}</div>}
+          {step === 6 && <div className="consult__summary"><span>Ringkasan konsultasi</span><dl><div><dt>Kota</dt><dd>{form.city}</dd></div><div><dt>Acara</dt><dd>{form.event}</dd></div><div><dt>Waktu</dt><dd>{form.date}</dd></div><div><dt>Venue</dt><dd>{form.venue}</dd></div><div><dt>WhatsApp</dt><dd>{form.phone}</dd></div></dl>{required ? <><button className="whatsapp-button" type="button" onClick={finishOnboarding} disabled={isSaving} aria-busy={isSaving}>{isSaving ? 'Menyimpan data…' : 'Masuk ke website'} {!isSaving && <HiArrowUpRight />}</button>{saveError && <p className="consult__save-error" role="alert">{saveError}</p>}</> : <button className="whatsapp-button" type="button" onClick={sendWhatsApp}><FaWhatsapp /> Lanjut ke WhatsApp</button>}</div>}
           <div ref={endRef} />
         </div>
-        {(step === 3 || step === 4) && <form className="consult__input" onSubmit={submitText}><label className="sr-only" htmlFor="consult-message">Balasan</label><input id="consult-message" autoFocus maxLength="120" value={input} onChange={(event) => setInput(event.target.value)} placeholder={step === 3 ? 'Contoh: Desember 2026' : 'Nama venue atau “Belum ada”'} /><button type="submit" disabled={!input.trim()} aria-label="Kirim balasan"><HiArrowUpRight /></button></form>}
+        {(step === 3 || step === 4 || step === 5) && <form className="consult__input" onSubmit={submitText}><label className="sr-only" htmlFor="consult-message">Balasan</label><input id="consult-message" autoFocus type={step === 5 ? 'tel' : 'text'} inputMode={step === 5 ? 'tel' : 'text'} autoComplete={step === 5 ? 'tel' : 'off'} maxLength="120" value={input} onChange={(event) => setInput(event.target.value)} placeholder={step === 3 ? 'Contoh: Desember 2026' : step === 4 ? 'Nama venue atau “Belum ada”' : 'Contoh: 0812 3456 7890'} /><button type="submit" disabled={!input.trim()} aria-label="Kirim balasan"><HiArrowUpRight /></button></form>}
       </section>
     </div>
   );
@@ -601,7 +677,8 @@ function PackageModal({ isOpen, onClose, packageSize, onConsult }) {
 }
 
 function GallerySection({ onOpen }) {
-  const previewImages = [galleryImages[3], galleryImages[0], galleryImages[5], galleryImages[9], galleryImages[11], galleryImages[2]];
+  const { gallery } = useSiteContent();
+  const previewImages = gallery.filter((image) => image.featured).slice(0, 6);
 
   return (
     <section className="gallery-section" id="gallery">
@@ -619,7 +696,7 @@ function GallerySection({ onOpen }) {
         <div className="gallery-preview">
           {previewImages.map((image, index) => (
             <button className={`gallery-preview__item gallery-preview__item--${index + 1}`} type="button" onClick={onOpen} aria-label={`Buka galeri dari foto ${index + 1}`} key={image.src}>
-              <img src={image.src} width={image.width} height={image.height} alt={image.alt} loading="lazy" decoding="async" />
+              <img src={image.src} width="1200" height="1500" alt={image.alt} loading="lazy" decoding="async" />
               <span>{String(index + 1).padStart(2, '0')}</span>
             </button>
           ))}
@@ -633,6 +710,8 @@ function GallerySection({ onOpen }) {
 }
 
 function GalleryModal({ onClose }) {
+  const { gallery } = useSiteContent();
+  const fullGalleryImages = gallery;
   const [selectedIndex, setSelectedIndex] = useState(null);
   const selectedImage = selectedIndex === null ? null : fullGalleryImages[selectedIndex];
 
@@ -651,7 +730,7 @@ function GalleryModal({ onClose }) {
       document.removeEventListener('keydown', onKey);
       document.body.classList.remove('modal-lock');
     };
-  }, [onClose, selectedIndex]);
+  }, [onClose, selectedIndex, fullGalleryImages.length]);
 
   const showPrevious = () => setSelectedIndex((selectedIndex - 1 + fullGalleryImages.length) % fullGalleryImages.length);
   const showNext = () => setSelectedIndex((selectedIndex + 1) % fullGalleryImages.length);
@@ -668,7 +747,7 @@ function GalleryModal({ onClose }) {
           <div className="gallery-collection">
             {fullGalleryImages.map((image, index) => (
               <button type="button" onClick={() => { setSelectedIndex(index); trackEvent('gallery_photo_open', { photo: index + 1 }); }} aria-label={`Perbesar foto ${index + 1}: ${image.alt}`} key={image.src}>
-                <img src={image.src} width={image.width} height={image.height} alt={image.alt} loading="lazy" decoding="async" />
+                <img src={image.src} width="1200" height="1500" alt={image.alt} loading="lazy" decoding="async" />
                 <span>{String(index + 1).padStart(2, '0')}</span>
               </button>
             ))}
@@ -688,13 +767,16 @@ function GalleryModal({ onClose }) {
   );
 }
 
-function App() {
+function App({ initialContent = defaultContent }) {
+  const siteContent = useMemo(() => mergeSiteContent(initialContent), [initialContent]);
   const [consultOpen, setConsultOpen] = useState(false);
   const [packagePreset, setPackagePreset] = useState('');
   const [packageModalOpen, setPackageModalOpen] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState('');
   const [legalOpen, setLegalOpen] = useState('');
   const [galleryOpen, setGalleryOpen] = useState(false);
+  const [recommendedPackageId, setRecommendedPackageId] = useState(() => getRecommendedPackageId(getStoredConsultationProfile()));
+  const [preferenceOpen, setPreferenceOpen] = useState(false);
 
   const openConsult = (preset = '') => {
     setPackagePreset(preset);
@@ -705,6 +787,21 @@ function App() {
     setSelectedPackage(size);
     setPackageModalOpen(true);
     trackEvent('package_open', { package: size });
+  };
+  const updatePackagePreference = (option) => {
+    const profile = getStoredConsultationProfile();
+    if (profile) {
+      try {
+        window.localStorage.setItem(consultationProfileKey, JSON.stringify({
+          ...profile,
+          packagePreferenceId: option.id,
+          preferenceUpdatedAt: new Date().toISOString(),
+        }));
+      } catch { /* The recommendation still updates for the current visit. */ }
+    }
+    setRecommendedPackageId(option.id);
+    setPreferenceOpen(false);
+    trackEvent('package_preference_updated', { package: option.id });
   };
 
   useEffect(() => {
@@ -734,26 +831,27 @@ function App() {
   }, []);
 
   return (
+    <SiteContentContext.Provider value={siteContent}>
     <>
       <a className="skip-link" href="#main-content">Lewati ke konten utama</a>
       <Header onConsult={() => openConsult()} onPackage={openPackage} />
       <main id="main-content">
         <section className="hero" id="home">
-          <div className="hero__image" aria-hidden="true"><img src="/assets/hero-hari-bahagia-hd.webp" srcSet="/assets/hero-hari-bahagia-840.webp 840w, /assets/hero-hari-bahagia-1280.webp 1280w, /assets/hero-hari-bahagia-hd.webp 1920w" sizes="100vw" alt="" width="1920" height="1280" fetchPriority="high" decoding="async" /></div><div className="hero__veil" />
+          <div className="hero__image"><img src={siteContent.hero.image} alt={siteContent.hero.imageAlt} width="1920" height="1280" fetchPriority="high" decoding="async" /></div><div className="hero__veil" />
           <div className="hero__content shell">
-            <p className="eyebrow">Wedding planning · Bandung & beyond</p>
-            <h1>Hari bahagiamu,<br /><em>expertly yours.</em></h1>
-            <p className="hero__copy">Perayaan yang terasa personal, direncanakan dengan tenang, dan dieksekusi sepenuh hati oleh satu tim yang selalu ada untukmu.</p>
-            <div className="hero__actions"><button type="button" className="button button--gold" onClick={() => openConsult()}>Mulai Konsultasi <HiArrowUpRight /></button><a href="#about" className="text-link">Kenali FMO <HiArrowDownRight /></a></div>
+            <p className="eyebrow">{siteContent.hero.eyebrow}</p>
+            <h1>{siteContent.hero.title}<br /><em>{siteContent.hero.accent}</em></h1>
+            <p className="hero__copy">{siteContent.hero.description}</p>
+            <div className="hero__actions"><button type="button" className="button button--gold" onClick={() => openConsult()}>{siteContent.hero.primaryCta} <HiArrowUpRight /></button><a href="#about" className="text-link">{siteContent.hero.secondaryCta} <HiArrowDownRight /></a></div>
           </div>
           <p className="hero__side-note">One day · One client · Total focus</p>
         </section>
 
-        <section className="trust-strip" aria-label="Keunggulan FMO"><div className="shell">{[['10+', 'years of experience'], ['1:1', 'personal specialist'], ['100%', 'transparent planning']].map(([value, label]) => <div key={label}><strong>{value}</strong><span>{label}</span></div>)}</div></section>
+        <section className="trust-strip" aria-label="Keunggulan FMO"><div className="shell">{siteContent.about.statistics.map(({ value, label }) => <div key={label}><strong>{value}</strong><span>{label}</span></div>)}</div></section>
 
         <section className="intro shell" id="about">
-          <div className="intro__heading"><p className="eyebrow eyebrow--dark">Established in 2016</p><h2>From wedding anxiety into a <em>seamless celebration.</em></h2></div>
-          <div className="intro__story"><p className="intro__lead">Kami percaya hari bahagiamu terlalu berharga untuk dirayakan dengan rasa cemas dan penuh kerahasiaan.</p><p>FMO hadir sebagai partner yang menerjemahkan visi menjadi perayaan yang tertata. Dengan pendekatan transparan dan perhatian personal, setiap keputusan terasa lebih ringan.</p><a href="#workflow">Lihat cara kami bekerja <HiArrowDownRight /></a></div>
+          <div className="intro__heading"><p className="eyebrow eyebrow--dark">{siteContent.about.eyebrow}</p><h2>{siteContent.about.title} <em>{siteContent.about.accent}</em></h2></div>
+          <div className="intro__story"><p className="intro__lead">{siteContent.about.lead}</p><p>{siteContent.about.description}</p><a href="#workflow">{siteContent.about.linkLabel} <HiArrowDownRight /></a></div>
         </section>
 
         <FeatureCarousel />
@@ -771,25 +869,25 @@ function App() {
                 <path className="workflow-route__track" d="M100 90 H700 C835 90 900 150 900 250 C900 335 820 390 700 390 H100 C30 390 30 485 100 540 C170 540 250 600 250 680 V810" />
                 <path className="workflow-route__progress" pathLength="1" d="M100 90 H700 C835 90 900 150 900 250 C900 335 820 390 700 390 H100 C30 390 30 485 100 540 C170 540 250 600 250 680 V810" />
               </svg>
-              {workflow.map(([number, title, copy, x, y], index) => <article className="workflow-step" data-workflow-reveal="step" style={{ '--route-x': `${x}%`, '--route-y': `${y}%`, '--reveal-delay': `${180 + index * 85}ms` }} key={number}><i /><div><span>{number}</span><h3>{title}</h3><p>{copy}</p></div></article>)}
+              {siteContent.workflow.phaseOne.slice(0, 10).map(({ title, description }, index) => { const [, , , x, y] = workflow[index]; const number = String(index + 1).padStart(2, '0'); return <article className="workflow-step" data-workflow-reveal="step" style={{ '--route-x': `${x}%`, '--route-y': `${y}%`, '--reveal-delay': `${180 + index * 85}ms` }} key={`${title}-${index}`}><i /><div><span>{number}</span><h3>{title}</h3><p>{description}</p></div></article>; })}
             </div>
             <div className="workflow-phase-divider" data-workflow-reveal="divider"><span>Vendors secured</span></div>
             <header className="workflow-phase-heading workflow-phase-heading--two" data-workflow-reveal="up"><div><p>FMO Workflow</p><h2>Phase <em>two.</em></h2></div><span>Persiapan mendalam bersama specialist dan vendor hingga seluruh detail siap dieksekusi.</span></header>
-            <div className="preparation-timeline" data-workflow-reveal="timeline">{preparation.map(([title, copy], index) => <article data-workflow-reveal={index % 2 === 0 ? 'from-left' : 'from-right'} style={{ '--reveal-delay': `${80 + (index % 2) * 100}ms` }} key={title}><i /><div><span>{String(index + 1).padStart(2, '0')}</span><h3>{title}</h3><p>{copy}</p></div></article>)}</div>
+            <div className="preparation-timeline" data-workflow-reveal="timeline">{siteContent.workflow.phaseTwo.map(({ title, description }, index) => <article data-workflow-reveal={index % 2 === 0 ? 'from-left' : 'from-right'} style={{ '--reveal-delay': `${80 + (index % 2) * 100}ms` }} key={`${title}-${index}`}><i /><div><span>{String(index + 1).padStart(2, '0')}</span><h3>{title}</h3><p>{description}</p></div></article>)}</div>
           </div>
         </section>
 
         <section className="specialists shell" id="specialists">
           <div className="section-heading"><div><p className="eyebrow eyebrow--dark">Meet your team</p><h2>Your personal<br /><em>wedding specialists.</em></h2></div><p>Lebih dari wedding planner—partner yang memahami keinginanmu sekaligus menguasai detail teknisnya.</p></div>
-          <div className="specialist-grid"><a href="https://instagram.com/byzackyjalaluddin" target="_blank" rel="noreferrer" className="specialist"><div><img src="/assets/page_8_img_3.jpeg" alt="Zacky Jalaluddin, FMO Wedding Specialist" width="600" height="800" loading="lazy" decoding="async" /></div><span>Founder · Wedding Specialist</span><h3>Zacky Jalaluddin</h3><p>@byzackyjalaluddin <HiArrowUpRight /></p></a><a href="https://instagram.com/byfauziahwindi" target="_blank" rel="noreferrer" className="specialist specialist--offset"><div><img src="/assets/page_8_img_5.jpeg" alt="Fauziah Windi, FMO Wedding Specialist" width="636" height="800" loading="lazy" decoding="async" /></div><span>Wedding Specialist</span><h3>Fauziah Windi</h3><p>@byfauziahwindi <HiArrowUpRight /></p></a></div>
+          <div className="specialist-grid">{siteContent.specialists.filter((specialist) => specialist.active).map((specialist, index) => <a href={`https://instagram.com/${specialist.instagram.replace('@', '')}`} target="_blank" rel="noreferrer" className={index % 2 ? 'specialist specialist--offset' : 'specialist'} key={`${specialist.name}-${index}`}><div><img src={specialist.image} alt={`${specialist.name}, FMO Wedding Specialist`} width="636" height="800" loading="lazy" decoding="async" /></div><span>{specialist.role}</span><h3>{specialist.name}</h3><p>@{specialist.instagram.replace('@', '')} <HiArrowUpRight /></p></a>)}</div>
         </section>
 
         <section className="guardian" id="guardian">
           <div className="shell">
             <header className="guardian__heading">
               <p className="eyebrow eyebrow--dark">Your calm on the wedding day</p>
-              <h2>Meet your<br /><em>Wedding Day Guardian.</em></h2>
-              <p>Bukan sekadar mengoordinasikan tim. Wedding Director menyatukan keluarga dan seluruh vendor agar setiap elemen bergerak selaras—dari awal acara hingga momen terakhir.</p>
+              <h2>{siteContent.guardian.title}</h2>
+              <p>{siteContent.guardian.description}</p>
             </header>
             <div className="guardian__map">
               <div className="guardian__director">
@@ -798,11 +896,11 @@ function App() {
                 <p>Wedding Specialist yang sudah mendampingimu sejak perencanaan, lalu memimpin seluruh eksekusi pada hari bahagia.</p>
               </div>
               <div className="guardian__branches">
-                {Object.entries(guardianRoles).map(([group, roles], groupIndex) => (
+                {Object.entries({ family: siteContent.guardian.family, vendors: siteContent.guardian.vendors }).map(([group, roles], groupIndex) => (
                   <article className="guardian__group" key={group}>
                     <div className="guardian__group-title"><span>0{groupIndex + 1}</span><h3>{group === 'family' ? 'Panitia keluarga' : "Vendor's team"}</h3></div>
                     <div className="guardian__roles">
-                      {roles.map(([title, copy], index) => <div className="guardian__role" key={title}><span>{String(index + 1).padStart(2, '0')}</span><div><h4>{title}</h4><p>{copy}</p></div></div>)}
+                      {roles.map(({ title, description }, index) => <div className="guardian__role" key={`${title}-${index}`}><span>{String(index + 1).padStart(2, '0')}</span><div><h4>{title}</h4><p>{description}</p></div></div>)}
                     </div>
                   </article>
                 ))}
@@ -811,36 +909,38 @@ function App() {
           </div>
         </section>
 
-        <section className="packages" id="packages"><div className="shell"><div className="section-heading"><div><p className="eyebrow eyebrow--dark">Curated starting points</p><h2>Pilih skala,<br /><em>personalisasi ceritanya.</em></h2></div><p>Setiap paket adalah titik awal. Vendor, konsep, dan layanan tetap dapat disesuaikan dalam private consultation session.</p></div><div className="package-grid">{packageOptions.map((item) => <PackageCard key={item.id} item={item} onOpen={openPackage} />)}</div><PackageComparison onOpen={openPackage} /><div className="mosque-package"><div><p className="eyebrow">A meaningful beginning</p><h3>Akad di Masjid</h3><p>Perayaan akad yang khidmat, hangat, dan tertata—dengan opsi hampers box atau makan di tempat.</p></div><button type="button" onClick={() => openPackage('Akad di Masjid')}>Explore this package <HiArrowUpRight /></button></div></div></section>
+        <section className="packages" id="packages"><div className="shell"><div className="section-heading"><div><p className="eyebrow eyebrow--dark">Curated starting points</p><h2>Pilih skala,<br /><em>personalisasi ceritanya.</em></h2></div><div className="package-heading__aside"><p>Setiap paket adalah titik awal. Vendor, konsep, dan layanan tetap dapat disesuaikan dalam private consultation session.</p><button type="button" onClick={() => setPreferenceOpen(true)}>Ubah preferensi paket <HiArrowUpRight /></button></div></div><div className="package-grid">{siteContent.packages.filter((item) => item.active).map((item) => <PackageCard key={item.id} item={item} onOpen={openPackage} featured={item.id === recommendedPackageId} />)}</div><PackageComparison onOpen={openPackage} /><div className="mosque-package"><div><p className="eyebrow">A meaningful beginning</p><h3>Akad di Masjid</h3><p>Perayaan akad yang khidmat, hangat, dan tertata—dengan opsi hampers box atau makan di tempat.</p></div><button type="button" onClick={() => openPackage('Akad di Masjid')}>Explore this package <HiArrowUpRight /></button></div></div></section>
 
         <section className="other-services" id="services">
           <div className="shell">
             <div className="section-heading section-heading--light"><div><p className="eyebrow">Beyond the wedding day</p><h2>Other FMO<br /><em>services.</em></h2></div><p>Momen bermakna tidak hanya hadir di hari pernikahan. Tim yang sama dapat mendampingimu pada rangkaian perayaan sebelum dan sesudahnya.</p></div>
             <div className="service-grid">
-              {otherServices.map((service) => <article className="service-card" key={service.id}><div className="service-card__image"><img src={service.image} alt={service.alt} loading="lazy" decoding="async" /><span>{service.label}</span></div><div className="service-card__copy"><span>{service.id}</span><h3>{service.title}</h3><p>{service.copy}</p><button type="button" onClick={() => openConsult(service.title)}>Diskusikan layanan <HiArrowUpRight /></button></div></article>)}
+              {siteContent.services.filter((service) => service.active).map((service, index) => <article className="service-card" key={`${service.title}-${index}`}><div className="service-card__image"><img src={service.image} alt={service.alt} loading="lazy" decoding="async" /><span>{service.label}</span></div><div className="service-card__copy"><span>{String(index + 1).padStart(2, '0')}</span><h3>{service.title}</h3><p>{service.description}</p><button type="button" onClick={() => openConsult(service.title)}>Diskusikan layanan <HiArrowUpRight /></button></div></article>)}
             </div>
           </div>
         </section>
 
         <SelectedMoments onConsult={openConsult} />
 
-        <section className="stories" id="stories"><div className="story-photo"><img src="/assets/hero-wedding-hd.webp" srcSet="/assets/hero-wedding-840.webp 840w, /assets/hero-wedding-1280.webp 1280w, /assets/hero-wedding-hd.webp 1672w" sizes="(max-width: 860px) 100vw, 50vw" alt="Pasangan FMO di hari pernikahan" width="1672" height="941" loading="lazy" decoding="async" /></div><div className="story-copy"><p className="eyebrow">Real couples · Real stories</p><div className="quote-mark">“</div><blockquote>Pelayanan FMO luar biasa dari awal sampai akhir acara. Semuanya berjalan lancar dan sesuai dengan apa yang direncanakan.</blockquote><p className="story-author">Fathimah & Hisaan <span>· FMO Couple</span></p><div className="story-nav" aria-hidden="true"><span>01</span><div><i /></div><span>03</span></div></div></section>
+        <section className="stories" id="stories"><div className="story-photo"><img src={siteContent.testimonial.image} alt={`${siteContent.testimonial.couple}, FMO Couple`} width="1672" height="941" loading="lazy" decoding="async" /></div><div className="story-copy"><p className="eyebrow">Real couples · Real stories</p><div className="quote-mark">“</div><blockquote>{siteContent.testimonial.quote}</blockquote><p className="story-author">{siteContent.testimonial.couple} <span>· {siteContent.testimonial.label}</span></p><div className="story-nav" aria-hidden="true"><span>01</span><div><i /></div><span>01</span></div></div></section>
 
-        <section className="faq shell" id="faq"><div className="faq__heading"><p className="eyebrow eyebrow--dark">Questions, answered</p><h2>Hal yang sering<br /><em>ditanyakan.</em></h2><p>Belum menemukan jawabanmu? Wedding Specialist kami siap membantu lewat konsultasi personal.</p><button type="button" className="button button--forest" onClick={() => openConsult()}>Tanya specialist <HiArrowUpRight /></button></div><div className="faq__list">{faqs.map(([question, answer], index) => <details key={question} open={index === 0}><summary><span>{String(index + 1).padStart(2, '0')}</span>{question}<HiChevronDown /></summary><p>{answer}</p></details>)}</div></section>
+        <section className="faq shell" id="faq"><div className="faq__heading"><p className="eyebrow eyebrow--dark">Questions, answered</p><h2>Hal yang sering<br /><em>ditanyakan.</em></h2><p>Belum menemukan jawabanmu? Wedding Specialist kami siap membantu lewat konsultasi personal.</p><button type="button" className="button button--forest" onClick={() => openConsult()}>Tanya specialist <HiArrowUpRight /></button></div><div className="faq__list">{siteContent.faq.filter((item) => item.active).map(({ question, answer }, index) => <details key={`${question}-${index}`} open={index === 0}><summary><span>{String(index + 1).padStart(2, '0')}</span>{question}<HiChevronDown /></summary><p>{answer}</p></details>)}</div></section>
 
-        <section className="closing"><div className="closing__image" aria-hidden="true"><img src="/assets/closing-couple-hd.webp" srcSet="/assets/closing-couple-840.webp 840w, /assets/closing-couple-1280.webp 1280w, /assets/closing-couple-hd.webp 1672w" sizes="100vw" alt="" width="1672" height="941" loading="lazy" decoding="async" /></div><div className="closing__veil" /><div className="closing__content shell"><p className="eyebrow">Begin your story</p><h2>Let’s make your day<br /><em>expertly yours.</em></h2><p>Mulai dari obrolan sederhana. Ceritakan impianmu, kami bantu menyusun jalannya.</p><button className="button button--gold" type="button" onClick={() => openConsult()}>Jadwalkan konsultasi <HiArrowUpRight /></button></div></section>
+        <section className="closing"><div className="closing__image"><img src={siteContent.closing.image} alt="FMO wedding celebration" width="1672" height="941" loading="lazy" decoding="async" /></div><div className="closing__veil" /><div className="closing__content shell"><p className="eyebrow">{siteContent.closing.eyebrow}</p><h2>{siteContent.closing.title}<br /><em>{siteContent.closing.accent}</em></h2><p>{siteContent.closing.description}</p><button className="button button--gold" type="button" onClick={() => openConsult()}>{siteContent.closing.buttonLabel} <HiArrowUpRight /></button></div></section>
         <GallerySection onOpen={() => { setGalleryOpen(true); trackEvent('gallery_open'); }} />
       </main>
 
-      <footer><div className="shell footer__top"><div className="footer__brand"><img src="/logo.png?v=20260827b" alt="FMO Wedding Specialist" width="800" height="564" /><p>Wedding planning yang personal, transparan, dan sepenuh hati.</p></div><div><p className="footer__label">Explore</p><a href="#about">Tentang FMO</a><a href="#workflow">Workflow</a><a href="#guardian">Wedding Day Guardian</a><a href="#packages">Packages</a><a href="#real-weddings">Selected celebrations</a><a href="#services">Other services</a><a href="#gallery">Galeri</a><a href="#faq">FAQ</a></div><div><p className="footer__label">Connect</p><a href="https://instagram.com/fmo_weddingspecialist" target="_blank" rel="noreferrer"><FaInstagram /> Instagram</a><a href="https://tiktok.com/@fmo_weddingspecialist" target="_blank" rel="noreferrer"><FaTiktok /> TikTok</a><a href="https://wa.me/6281221212877" target="_blank" rel="noreferrer"><FaWhatsapp /> WhatsApp</a></div><div><p className="footer__label">Information</p><p>Bandung, West Java<br />Available beyond the city.</p><button type="button" onClick={() => setLegalOpen('privacy')}>Privacy Policy</button><button type="button" onClick={() => setLegalOpen('terms')}>Terms of Use</button></div></div><div className="shell footer__bottom"><span>© {new Date().getFullYear()} FMO Wedding Specialist</span><span>expertly <em>yours.</em></span></div></footer>
+      <footer><div className="shell footer__top"><div className="footer__brand"><img src="/logo.png?v=20260827b" alt="FMO Wedding Specialist" width="800" height="564" /><p>{siteContent.business.footerDescription}</p></div><div><p className="footer__label">Explore</p><a href="#about">Tentang FMO</a><a href="#workflow">Workflow</a><a href="#guardian">Wedding Day Guardian</a><a href="#packages">Packages</a><a href="#real-weddings">Selected celebrations</a><a href="#services">Other services</a><a href="#gallery">Galeri</a><a href="#faq">FAQ</a></div><div><p className="footer__label">Connect</p><a href={`https://instagram.com/${siteContent.business.instagram.replace('@', '')}`} target="_blank" rel="noreferrer"><FaInstagram /> Instagram</a><a href={`https://tiktok.com/@${siteContent.business.tiktok.replace('@', '')}`} target="_blank" rel="noreferrer"><FaTiktok /> TikTok</a><a href={`https://wa.me/${siteContent.business.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noreferrer"><FaWhatsapp /> WhatsApp</a></div><div><p className="footer__label">Information</p><p>{siteContent.business.address}<br />{siteContent.business.availability}</p><button type="button" onClick={() => setLegalOpen('privacy')}>Privacy Policy</button><button type="button" onClick={() => setLegalOpen('terms')}>Terms of Use</button></div></div><div className="shell footer__bottom"><span>© {new Date().getFullYear()} FMO Wedding Specialist</span><span>expertly <em>yours.</em></span></div></footer>
 
-      <AudioControl />
+      <AudioControl onProfileSaved={(profile) => setRecommendedPackageId(getRecommendedPackageId(profile))} />
       <button className="floating-consult" type="button" onClick={() => openConsult()} aria-label="Buka konsultasi"><FaWhatsapp /><span>Konsultasi</span></button>
       {consultOpen && <Consultation isOpen onClose={() => setConsultOpen(false)} preset={packagePreset} />}
       {packageModalOpen && <PackageModal isOpen onClose={() => setPackageModalOpen(false)} packageSize={selectedPackage} onConsult={openConsult} />}
       {legalOpen && <LegalModal type={legalOpen} onClose={() => setLegalOpen('')} />}
       {galleryOpen && <GalleryModal onClose={() => setGalleryOpen(false)} />}
+      {preferenceOpen && <PackagePreferenceModal currentPackageId={recommendedPackageId} onClose={() => setPreferenceOpen(false)} onSelect={updatePackagePreference} />}
     </>
+    </SiteContentContext.Provider>
   );
 }
 
