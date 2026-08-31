@@ -71,7 +71,7 @@ export default function AdminDashboard({ initialContent, adminName, adminEmail }
         <nav aria-label="Modul konten">
           {modules.map((item) => <button type="button" className={item.id === activeModule ? 'is-active' : ''} onClick={() => { setActiveModule(item.id); setMobileNav(false); }} key={item.id}><span>{item.label}</span><small>{item.description}</small></button>)}
         </nav>
-        <div className="admin-user"><span>{adminName}</span><small>{adminEmail}</small><a href="/signout-with-chatgpt?return_to=/admin" target="_top">Keluar</a></div>
+        <div className="admin-user"><span>{adminName}</span><small>{adminEmail}</small><form action="/api/admin/logout" method="post"><button type="submit">Keluar</button></form></div>
       </aside>
 
       <section className="admin-workspace">
