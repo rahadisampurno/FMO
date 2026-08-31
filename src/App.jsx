@@ -479,6 +479,7 @@ function FeatureCarousel() {
 }
 
 function Consultation({ isOpen, onClose, preset = '', required = false, onComplete }) {
+  const { business } = useSiteContent();
   const contextLabel = preset ? (/^\d+$/.test(preset) ? `Paket ${Number(preset).toLocaleString('id-ID')} pax` : preset) : '';
   const totalSteps = contextLabel ? 4 : 5;
   const [step, setStep] = useState(1);
@@ -567,8 +568,9 @@ function Consultation({ isOpen, onClose, preset = '', required = false, onComple
 
   const sendWhatsApp = () => {
     const message = `Halo FMO Wedding Specialist,\n\nSaya ingin berkonsultasi tentang rencana pernikahan:\n• Kota: ${form.city}\n• Acara: ${form.event}\n• Tanggal/bulan: ${form.date}\n• Venue: ${form.venue}\n• Nomor WhatsApp: ${form.phone}\n\nMohon panduannya untuk langkah selanjutnya. Terima kasih.`;
+    const whatsappNumber = String(business.whatsapp || '').replace(/\D/g, '') || defaultContent.business.whatsapp;
     trackEvent('consultation_whatsapp', { context: form.event || 'general', city: form.city });
-    window.open(`https://wa.me/6281221212877?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
   };
 
   const finishOnboarding = async () => {
