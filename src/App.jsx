@@ -617,6 +617,7 @@ function Consultation({ isOpen, onClose, preset = '', required = false, onComple
 }
 
 function PackageModal({ isOpen, onClose, packageSize, onConsult }) {
+  const { packages } = useSiteContent();
   useEffect(() => {
     if (!isOpen) return undefined;
     const onKey = (event) => event.key === 'Escape' && onClose();
@@ -630,41 +631,16 @@ function PackageModal({ isOpen, onClose, packageSize, onConsult }) {
 
   if (!isOpen) return null;
 
-  let content;
-  if (packageSize === 'Akad di Masjid') {
-    content = (
-      <>
-        <img src="/packages/15_M.webp" alt="Akad Di Masjid 1" className="package-modal__image" decoding="async" />
-        <img src="/packages/16_M.webp" alt="Akad Di Masjid 2" className="package-modal__image" loading="lazy" decoding="async" />
-        <img src="/packages/17_M.webp" alt="Akad Di Masjid 3" className="package-modal__image" loading="lazy" decoding="async" />
-        <img src="/packages/18_M.webp" alt="Akad Di Masjid 4" className="package-modal__image" loading="lazy" decoding="async" />
-        <img src="/packages/19_M.webp" alt="Akad Di Masjid 5" className="package-modal__image" loading="lazy" decoding="async" />
-      </>
-    );
-  } else {
-    const letterMap = { '100': 'A', '350': 'B', '500': 'C', '1000': 'D' };
-    const letter = letterMap[packageSize];
-    if (letter) {
-      const addonsFile = packageSize === '1000' ? '17_D.webp' : `17${letter}.webp`;
-      content = (
-        <>
-          <img src="/slides/slide-14.webp" alt="Package Intro" className="package-modal__image" decoding="async" />
-          <img src={`/packages/15${letter}.webp`} alt={`Package ${packageSize} pax part 1`} className="package-modal__image" loading="lazy" decoding="async" />
-          <img src={`/packages/16${letter}.webp`} alt={`Package ${packageSize} pax part 2`} className="package-modal__image" loading="lazy" decoding="async" />
-
-          <img src="/slides/slide-17.webp" alt="Package closing quote" className="package-modal__image" loading="lazy" decoding="async" />
-          <img src={`/packages/${addonsFile}`} alt="Add-ons" className="package-modal__image" loading="lazy" decoding="async" />
-        </>
-      );
-    }
-  }
+  const selectedPackage = packages.find((item) => item.id === packageSize);
+  const visibleMedia = (selectedPackage?.media || []).filter((item) => item.active && item.src);
 
   return (
     <div className="package-modal-overlay" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <div className="package-modal">
         <button className="package-modal__close" type="button" onClick={onClose} aria-label="Tutup"><HiOutlineXMark /></button>
         <div className="package-modal__scroll">
-          {content}
+          <header className="package-modal__header"><span>FMO Package</span><h2>{selectedPackage?.title || 'Detail Paket'}</h2><p>{selectedPackage?.note || 'Pilih paket yang paling sesuai untuk memulai konsultasi personal bersama FMO.'}</p></header>
+          {visibleMedia.length > 0 ? visibleMedia.map((item, index) => <PackageMedia key={`${item.src}-${index}`} item={item} index={index} />) : <div className="package-modal__empty"><strong>Detail paket sedang disiapkan.</strong><p>Silakan konsultasikan paket ini untuk mendapatkan informasi lengkap dari tim FMO.</p></div>}
           <div className="package-modal__cta">
             <button type="button" className="button button--gold" onClick={() => { onClose(); onConsult(packageSize); }}>
               Konsultasikan Paket Ini <HiArrowUpRight />
@@ -674,6 +650,12 @@ function PackageModal({ isOpen, onClose, packageSize, onConsult }) {
       </div>
     </div>
   );
+}
+
+function PackageMedia({ item, index }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return <div className="package-modal__media-error" role="status"><strong>File {index + 1} belum dapat ditampilkan.</strong><p>Admin dapat mengganti file ini dari Content Studio.</p></div>;
+  return <img src={item.src} alt={item.alt || `Detail paket bagian ${index + 1}`} className="package-modal__image" loading={index === 0 ? 'eager' : 'lazy'} decoding="async" onError={() => setFailed(true)} />;
 }
 
 function GallerySection({ onOpen }) {

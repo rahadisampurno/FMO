@@ -32,11 +32,21 @@ export const defaultContent = {
     { name: 'Fauziah Windi', role: 'Wedding Specialist', image: '/assets/page_8_img_5.jpeg', instagram: 'byfauziahwindi', active: true },
   ],
   packages: [
-    { id: 'Akad di Masjid', kicker: 'A meaningful beginning', guests: '', title: 'Akad di Masjid', note: 'Prosesi sakral yang khidmat, hangat, dan tertata.', features: ['Mosque ceremony planning', 'Hampers or dine-in option', 'Family coordination', 'Wedding day management'], active: true },
-    { id: '100', kicker: '', guests: '100', title: 'Intimate', note: 'Hangat, personal, dan penuh makna.', features: ['Venue & catering', 'Decoration & styling', 'Documentation', 'Wedding organizer'], active: true },
-    { id: '350', kicker: '', guests: '350', title: 'Signature', note: 'Perayaan lengkap dengan detail yang terasa personal.', features: ['Curated vendor team', 'Full planning assistance', 'Guest experience', 'Wedding day management'], active: true },
-    { id: '500', kicker: '', guests: '500', title: 'Celebration', note: 'Dirancang untuk perayaan besar yang tetap terasa intim.', features: ['Venue & catering', 'Custom decoration', 'Entertainment', 'End-to-end coordination'], active: true },
-    { id: '1000', kicker: '', guests: '1.000', title: 'Grand', note: 'Skala besar, sistematis, dan tetap effortless.', features: ['Multi-vendor operation', 'Guest flow management', 'Technical production', 'Full specialist team'], active: true },
+    { id: 'Akad di Masjid', kicker: 'A meaningful beginning', guests: '', title: 'Akad di Masjid', note: 'Prosesi sakral yang khidmat, hangat, dan tertata.', features: ['Mosque ceremony planning', 'Hampers or dine-in option', 'Family coordination', 'Wedding day management'], media: [
+      { src: '/packages/15_M.webp', alt: 'Detail paket Akad di Masjid bagian 1', active: true }, { src: '/packages/16_M.webp', alt: 'Detail paket Akad di Masjid bagian 2', active: true }, { src: '/packages/17_M.webp', alt: 'Detail paket Akad di Masjid bagian 3', active: true }, { src: '/packages/18_M.webp', alt: 'Detail paket Akad di Masjid bagian 4', active: true }, { src: '/packages/19_M.webp', alt: 'Detail paket Akad di Masjid bagian 5', active: true },
+    ], active: true },
+    { id: '100', kicker: '', guests: '100', title: 'Intimate', note: 'Hangat, personal, dan penuh makna.', features: ['Venue & catering', 'Decoration & styling', 'Documentation', 'Wedding organizer'], media: [
+      { src: '/slides/slide-14.webp', alt: 'Pengantar paket Intimate', active: true }, { src: '/packages/15A.webp', alt: 'Detail paket Intimate bagian 1', active: true }, { src: '/packages/16A.webp', alt: 'Detail paket Intimate bagian 2', active: true }, { src: '/slides/slide-17.webp', alt: 'Penutup paket Intimate', active: true }, { src: '/packages/17A.webp', alt: 'Add-on paket Intimate', active: true },
+    ], active: true },
+    { id: '350', kicker: '', guests: '350', title: 'Signature', note: 'Perayaan lengkap dengan detail yang terasa personal.', features: ['Curated vendor team', 'Full planning assistance', 'Guest experience', 'Wedding day management'], media: [
+      { src: '/slides/slide-14.webp', alt: 'Pengantar paket Signature', active: true }, { src: '/packages/15B.webp', alt: 'Detail paket Signature bagian 1', active: true }, { src: '/packages/16B.webp', alt: 'Detail paket Signature bagian 2', active: true }, { src: '/slides/slide-17.webp', alt: 'Penutup paket Signature', active: true }, { src: '/packages/17B.webp', alt: 'Add-on paket Signature', active: true },
+    ], active: true },
+    { id: '500', kicker: '', guests: '500', title: 'Celebration', note: 'Dirancang untuk perayaan besar yang tetap terasa intim.', features: ['Venue & catering', 'Custom decoration', 'Entertainment', 'End-to-end coordination'], media: [
+      { src: '/slides/slide-14.webp', alt: 'Pengantar paket Celebration', active: true }, { src: '/packages/15C.webp', alt: 'Detail paket Celebration bagian 1', active: true }, { src: '/packages/16C.webp', alt: 'Detail paket Celebration bagian 2', active: true }, { src: '/slides/slide-17.webp', alt: 'Penutup paket Celebration', active: true }, { src: '/packages/17C.webp', alt: 'Add-on paket Celebration', active: true },
+    ], active: true },
+    { id: '1000', kicker: '', guests: '1.000', title: 'Grand', note: 'Skala besar, sistematis, dan tetap effortless.', features: ['Multi-vendor operation', 'Guest flow management', 'Technical production', 'Full specialist team'], media: [
+      { src: '/slides/slide-14.webp', alt: 'Pengantar paket Grand', active: true }, { src: '/packages/15D.webp', alt: 'Detail paket Grand bagian 1', active: true }, { src: '/packages/16D.webp', alt: 'Detail paket Grand bagian 2', active: true }, { src: '/slides/slide-17.webp', alt: 'Penutup paket Grand', active: true }, { src: '/packages/17_D.webp', alt: 'Add-on paket Grand', active: true },
+    ], active: true },
   ],
   workflow: {
     phaseOne: [
@@ -142,6 +152,10 @@ export function mergeSiteContent(value?: Partial<SiteContent> | null): SiteConte
     seo: { ...defaultContent.seo, ...value.seo },
     hero: { ...defaultContent.hero, ...value.hero },
     about: { ...defaultContent.about, ...value.about },
+    packages: (value.packages ?? defaultContent.packages).map((item) => {
+      const fallback = defaultContent.packages.find((candidate) => candidate.id === item.id);
+      return { ...fallback, ...item, media: item.media ?? fallback?.media ?? [] };
+    }),
     workflow: {
       ...defaultContent.workflow,
       ...value.workflow,

@@ -28,7 +28,7 @@ const labels: Record<string, string> = {
   primaryCta: 'Tombol utama', secondaryCta: 'Tombol kedua', linkLabel: 'Label tautan', image: 'Gambar', imageAlt: 'Alt text gambar',
   value: 'Nilai', label: 'Label', name: 'Nama', role: 'Jabatan', instagram: 'Instagram', active: 'Tampilkan di website',
   id: 'ID paket', kicker: 'Label paket', guests: 'Kapasitas tamu', note: 'Ringkasan', features: 'Benefit', question: 'Pertanyaan',
-  answer: 'Jawaban', quote: 'Isi testimoni', couple: 'Nama pasangan', buttonLabel: 'Label tombol', src: 'File gambar', featured: 'Tampilkan di halaman depan',
+  answer: 'Jawaban', quote: 'Isi testimoni', couple: 'Nama pasangan', buttonLabel: 'Label tombol', src: 'File gambar', featured: 'Tampilkan di halaman depan', media: 'File yang ditampilkan',
   whatsapp: 'Nomor WhatsApp', tiktok: 'TikTok', address: 'Alamat', availability: 'Area layanan', footerDescription: 'Deskripsi footer',
   music: 'File musik', musicEnabled: 'Aktifkan musik', shareImage: 'Gambar share', alt: 'Alt text',
 };
@@ -110,10 +110,23 @@ function CollectionEditor({ value, onChange, title }: { value: JsonObject[]; onC
 
 function ContentField({ fieldKey, value, onChange }: { fieldKey: string; value: unknown; onChange: (value: unknown) => void }) {
   if (typeof value === 'boolean') return <label className="admin-toggle"><input type="checkbox" checked={value} onChange={(event) => onChange(event.target.checked)} /><span>{labels[fieldKey] || fieldKey}</span></label>;
+  if (Array.isArray(value) && value.some((item) => typeof item === 'object' && item !== null)) return <NestedMediaEditor value={value as JsonObject[]} onChange={onChange} />;
   if (Array.isArray(value)) return <label className="admin-field admin-field--wide"><span>{labels[fieldKey] || fieldKey}</span><textarea value={value.join('\n')} onChange={(event) => onChange(event.target.value.split('\n').map((item) => item.trim()).filter(Boolean))} rows={Math.max(4, value.length)} /><small>Satu item per baris.</small></label>;
   if (mediaFields.has(fieldKey)) return <MediaField fieldKey={fieldKey} value={String(value ?? '')} onChange={onChange} />;
   const common = { value: String(value ?? ''), onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(event.target.value) };
   return <label className={`admin-field ${longFields.has(fieldKey) ? 'admin-field--wide' : ''}`}><span>{labels[fieldKey] || fieldKey}</span>{longFields.has(fieldKey) ? <textarea {...common} rows={4} /> : <input {...common} disabled={fieldKey === 'id'} />}{fieldKey === 'id' && <small>ID paket dikunci agar tautan dan rekomendasi tetap aman.</small>}</label>;
+}
+
+function NestedMediaEditor({ value, onChange }: { value: JsonObject[]; onChange: (value: JsonObject[]) => void }) {
+  const update = (index: number, key: string, next: unknown) => onChange(value.map((item, itemIndex) => itemIndex === index ? { ...item, [key]: next } : item));
+  const move = (index: number, direction: number) => {
+    const target = index + direction;
+    if (target < 0 || target >= value.length) return;
+    const next = [...value];
+    [next[index], next[target]] = [next[target], next[index]];
+    onChange(next);
+  };
+  return <div className="admin-field admin-field--wide admin-package-media"><div className="admin-package-media__heading"><div><span>File yang ditampilkan</span><small>Urutan file di bawah sama dengan urutan tampil di popup paket.</small></div><button type="button" onClick={() => onChange([...value, { src: '', alt: '', active: true }])}>+ Tambah file</button></div><div className="admin-package-media__list">{value.map((item, index) => <div className="admin-package-media__item" key={`${String(item.src || 'file')}-${index}`}><div className="admin-package-media__controls"><strong>File {index + 1}</strong><span><button type="button" onClick={() => move(index, -1)} disabled={index === 0} aria-label="Naikkan file">↑</button><button type="button" onClick={() => move(index, 1)} disabled={index === value.length - 1} aria-label="Turunkan file">↓</button><button type="button" className="danger" onClick={() => onChange(value.filter((_, itemIndex) => itemIndex !== index))}>Hapus</button></span></div><MediaField fieldKey="src" value={String(item.src ?? '')} onChange={(next) => update(index, 'src', next)} /><ContentField fieldKey="alt" value={item.alt ?? ''} onChange={(next) => update(index, 'alt', next)} /><ContentField fieldKey="active" value={item.active ?? true} onChange={(next) => update(index, 'active', next)} /></div>)}</div>{value.length === 0 && <p className="admin-package-media__empty">Belum ada file. Tambahkan minimal satu gambar agar popup paket memiliki isi.</p>}</div>;
 }
 
 function MediaField({ fieldKey, value, onChange }: { fieldKey: string; value: string; onChange: (value: string) => void }) {
