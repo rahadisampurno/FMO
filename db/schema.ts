@@ -7,3 +7,10 @@ export const siteContent = sqliteTable('site_content', {
   updatedAt: text('updated_at').notNull(),
   updatedBy: text('updated_by').notNull(),
 });
+
+export const adminLoginAttempts = sqliteTable('admin_login_attempts', {
+  loginKey: text('login_key').primaryKey(),
+  failures: integer('failures').notNull().default(0),
+  blockedUntil: integer('blocked_until').notNull().default(0),
+  updatedAt: integer('updated_at').notNull(),
+});

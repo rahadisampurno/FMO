@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 
 const COOKIE_NAME = 'fmo_admin_session';
 const SESSION_SECONDS = 60 * 60 * 8;
+const PASSWORD_HASH_ITERATIONS = 100_000;
 const encoder = new TextEncoder();
 
 type AdminUser = { email: string; displayName: string };
@@ -24,13 +25,18 @@ export function safeReturnTo(value?: string | null) {
 export async function verifyAdminCredentials(username: string, password: string) {
   const configuredUsername = runtimeEnv().FMO_ADMIN_USERNAME?.trim().toLowerCase();
   const configuredHash = runtimeEnv().FMO_ADMIN_PASSWORD_HASH;
-  if (!configuredUsername || !configuredHash || username.trim().toLowerCase() !== configuredUsername) return false;
+  if (!configuredUsername || !configuredHash || username.length > 254 || password.length > 256) return false;
   const [scheme, iterationsRaw, salt, expected] = configuredHash.split('$');
   const iterations = Number(iterationsRaw);
-  if (scheme !== 'pbkdf2' || !iterations || !salt || !expected) return false;
-  const key = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
-  const derived = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: fromBase64Url(salt), iterations }, key, 256);
-  return constantTimeEqual(new Uint8Array(derived), fromBase64Url(expected));
+  const saltBytes = fromBase64Url(salt || '');
+  const expectedBytes = fromBase64Url(expected || '');
+  if (scheme !== 'pbkdf2' || iterations !== PASSWORD_HASH_ITERATIONS || saltBytes.length < 16 || expectedBytes.length !== 32) return false;
+  try {
+    const key = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
+    const derived = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: saltBytes, iterations }, key, 256);
+    const passwordMatches = constantTimeEqual(new Uint8Array(derived), expectedBytes);
+    return constantTimeEqual(encoder.encode(username.trim().toLowerCase()), encoder.encode(configuredUsername)) && passwordMatches;
+  } catch { return false; }
 }
 
 export async function createAdminSession(username: string) {
