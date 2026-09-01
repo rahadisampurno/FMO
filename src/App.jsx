@@ -53,7 +53,7 @@ function trackEvent(name, detail = {}) {
 }
 
 const consultationEndpoint =
-  import.meta.env.VITE_FMO_LEADS_ENDPOINT?.trim() ||
+  process.env.NEXT_PUBLIC_FMO_LEADS_ENDPOINT?.trim() ||
   'https://script.google.com/macros/s/AKfycbxG8rv0SrQhywcIMKFPP8yxHEudP_ibakIHPU5rDBYNwR1FeAKvxRJOvlLJ0A_-j-cH9Q/exec';
 
 const consultationProfileKey = 'fmo-consultation-profile';

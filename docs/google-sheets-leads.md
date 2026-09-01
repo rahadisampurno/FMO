@@ -12,7 +12,7 @@ Website mengirim brief konsultasi ke spreadsheet `Data Lead Traffic Website FMO`
 6. Buat `.env.local` di root project dan isi:
 
    ```env
-   VITE_FMO_LEADS_ENDPOINT=https://script.google.com/macros/s/DEPLOYMENT_ID/exec
+   NEXT_PUBLIC_FMO_LEADS_ENDPOINT=https://script.google.com/macros/s/DEPLOYMENT_ID/exec
    ```
 
 7. Restart service Vite setelah mengubah environment variable.

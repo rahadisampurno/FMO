@@ -1,4 +1,3 @@
-import { env } from 'cloudflare:workers';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
@@ -8,10 +7,6 @@ const PASSWORD_HASH_ITERATIONS = 100_000;
 const encoder = new TextEncoder();
 
 type AdminUser = { email: string; displayName: string };
-
-function runtimeEnv() {
-  return env as unknown as Record<string, string | undefined>;
-}
 
 export function safeReturnTo(value?: string | null) {
   if (!value?.startsWith('/') || value.startsWith('//')) return '/admin';
@@ -23,8 +18,8 @@ export function safeReturnTo(value?: string | null) {
 }
 
 export async function verifyAdminCredentials(username: string, password: string) {
-  const configuredUsername = runtimeEnv().FMO_ADMIN_USERNAME?.trim().toLowerCase();
-  const configuredHash = runtimeEnv().FMO_ADMIN_PASSWORD_HASH;
+  const configuredUsername = process.env.FMO_ADMIN_USERNAME?.trim().toLowerCase();
+  const configuredHash = process.env.FMO_ADMIN_PASSWORD_HASH;
   if (!configuredUsername || !configuredHash || username.length > 254 || password.length > 256) return false;
   const [scheme, iterationsRaw, salt, expected] = configuredHash.split('$');
   const iterations = Number(iterationsRaw);
@@ -40,7 +35,7 @@ export async function verifyAdminCredentials(username: string, password: string)
 }
 
 export async function createAdminSession(username: string) {
-  const secret = runtimeEnv().FMO_ADMIN_SESSION_SECRET;
+  const secret = process.env.FMO_ADMIN_SESSION_SECRET;
   if (!secret) throw new Error('admin_session_not_configured');
   const payload = toBase64Url(encoder.encode(JSON.stringify({ sub: username.trim().toLowerCase(), exp: Math.floor(Date.now() / 1000) + SESSION_SECONDS })));
   return `${payload}.${await sign(payload, secret)}`;
@@ -67,13 +62,13 @@ export function expiredAdminSessionCookie(secure: boolean) {
 }
 
 async function verifySession(token?: string) {
-  const secret = runtimeEnv().FMO_ADMIN_SESSION_SECRET;
+  const secret = process.env.FMO_ADMIN_SESSION_SECRET;
   if (!token || !secret) return null;
   const [payload, signature] = token.split('.');
   if (!payload || !signature || !constantTimeEqual(fromBase64Url(signature), fromBase64Url(await sign(payload, secret)))) return null;
   try {
     const data = JSON.parse(new TextDecoder().decode(fromBase64Url(payload))) as { sub?: string; exp?: number };
-    const configuredUsername = runtimeEnv().FMO_ADMIN_USERNAME?.trim().toLowerCase();
+    const configuredUsername = process.env.FMO_ADMIN_USERNAME?.trim().toLowerCase();
     if (!data.sub || data.sub !== configuredUsername || !data.exp || data.exp <= Math.floor(Date.now() / 1000)) return null;
     return data.sub;
   } catch { return null; }
