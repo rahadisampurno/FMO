@@ -32,7 +32,9 @@ export async function verifyAdminCredentials(username: string, password: string)
   const configuredUsername = process.env.FMO_ADMIN_USERNAME?.trim().toLowerCase();
   const configuredHash = process.env.FMO_ADMIN_PASSWORD_HASH;
   if (!configuredUsername || !configuredHash || username.length > 254 || password.length > 256) return false;
-  const [scheme, iterationsRaw, salt, expected] = configuredHash.split('$');
+  // Some environment-variable editors preserve shell-style escaped dollar
+  // separators. Accept both forms so a valid PBKDF2 secret is not rejected.
+  const [scheme, iterationsRaw, salt, expected] = configuredHash.replaceAll('\\$', '$').split('$');
   const iterations = Number(iterationsRaw);
   const saltBytes = fromBase64Url(salt || '');
   const expectedBytes = fromBase64Url(expected || '');

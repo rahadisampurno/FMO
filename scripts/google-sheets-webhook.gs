@@ -20,8 +20,6 @@ function ensureSheetStructure(spreadsheet, sheet) {
   spreadsheet.setSpreadsheetTimeZone('Asia/Jakarta');
   sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
   sheet.setFrozenRows(1);
-  sheet.getRange('A:A').setNumberFormat('dd mmm yyyy HH:mm:ss');
-  sheet.getRange('F:F').setNumberFormat('@');
 }
 
 function doPost(event) {
@@ -53,10 +51,9 @@ function doPost(event) {
       if (existingIds.includes(submissionId)) return jsonResponse({ ok: true, duplicate: true });
     }
 
-    sheet.appendRow([new Date(), city, eventType, plannedDate, venue, '', source, submissionId]);
-    const appendedRow = sheet.getLastRow();
-    sheet.getRange(appendedRow, 1).setNumberFormat('dd mmm yyyy HH:mm:ss');
-    sheet.getRange(appendedRow, 6).setNumberFormat('@').setValue(phone);
+    // Typed table columns reject setNumberFormat calls. Writing the values in
+    // one append keeps the table's configured column types and avoids partial rows.
+    sheet.appendRow([new Date(), city, eventType, plannedDate, venue, phone, source, submissionId]);
     return jsonResponse({ ok: true });
   } catch (error) {
     return jsonResponse({ ok: false, error: String(error && error.message ? error.message : error) });
