@@ -5,10 +5,9 @@ import { readSiteContent } from '@/lib/content-store';
 
 export const dynamic = 'force-dynamic';
 
-const canonicalOrigin = new URL('https://darkred-gorilla-538357.hostingersite.com');
+const canonicalOrigin = new URL('https://fmoweddingspecialist.com');
 const trustedOrigins = new Map([
   [canonicalOrigin.host, canonicalOrigin],
-  ['fmo-wedding-specialist.rahadi-rahasia.chatgpt.site', new URL('https://fmo-wedding-specialist.rahadi-rahasia.chatgpt.site')],
 ]);
 
 export async function generateMetadata(): Promise<Metadata> {

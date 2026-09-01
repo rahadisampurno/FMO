@@ -5,7 +5,7 @@ const COOKIE_NAME = 'fmo_admin_session';
 const SESSION_SECONDS = 60 * 60 * 8;
 const PASSWORD_HASH_ITERATIONS = 100_000;
 const encoder = new TextEncoder();
-const canonicalOrigin = 'https://darkred-gorilla-538357.hostingersite.com';
+const canonicalOrigin = 'https://fmoweddingspecialist.com';
 
 type AdminUser = { email: string; displayName: string };
 
