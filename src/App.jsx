@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState } from 
 import { FaInstagram, FaTiktok, FaWhatsapp, FaVolumeHigh, FaVolumeXmark } from 'react-icons/fa6';
 import { HiArrowDownRight, HiArrowUpRight, HiCheck, HiChevronDown, HiOutlineXMark } from 'react-icons/hi2';
 import { defaultContent, mergeSiteContent } from './content';
+import { buildConsultationWhatsAppUrl, getConsultationContextLabel } from './consultation';
 
 const SiteContentContext = createContext(defaultContent);
 const useSiteContent = () => useContext(SiteContentContext);
@@ -77,6 +78,11 @@ function getStoredConsultationProfile() {
   } catch {
     return null;
   }
+}
+
+function openConsultationWhatsApp(profile, business, context = '') {
+  const whatsappNumber = String(business.whatsapp || defaultContent.business.whatsapp).replace(/\D/g, '');
+  window.open(buildConsultationWhatsAppUrl(profile, whatsappNumber, context), '_blank', 'noopener,noreferrer');
 }
 
 function getRecommendedPackageId(profile) {
@@ -480,7 +486,7 @@ function FeatureCarousel() {
 
 function Consultation({ isOpen, onClose, preset = '', required = false, onComplete }) {
   const { business } = useSiteContent();
-  const contextLabel = preset ? (/^\d+$/.test(preset) ? `Paket ${Number(preset).toLocaleString('id-ID')} pax` : preset) : '';
+  const contextLabel = getConsultationContextLabel(preset);
   const totalSteps = contextLabel ? 4 : 5;
   const [step, setStep] = useState(1);
   const [progressStep, setProgressStep] = useState(1);
@@ -567,10 +573,8 @@ function Consultation({ isOpen, onClose, preset = '', required = false, onComple
   };
 
   const sendWhatsApp = () => {
-    const message = `Halo FMO Wedding Specialist,\n\nSaya ingin berkonsultasi tentang rencana pernikahan:\n• Kota: ${form.city}\n• Acara: ${form.event}\n• Tanggal/bulan: ${form.date}\n• Venue: ${form.venue}\n• Nomor WhatsApp: ${form.phone}\n\nMohon panduannya untuk langkah selanjutnya. Terima kasih.`;
-    const whatsappNumber = String(business.whatsapp || '').replace(/\D/g, '') || defaultContent.business.whatsapp;
     trackEvent('consultation_whatsapp', { context: form.event || 'general', city: form.city });
-    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
+    openConsultationWhatsApp(form, business, contextLabel);
   };
 
   const finishOnboarding = async () => {
@@ -753,6 +757,7 @@ function GalleryModal({ onClose }) {
 
 function App({ initialContent = defaultContent }) {
   const siteContent = useMemo(() => mergeSiteContent(initialContent), [initialContent]);
+  const [consultationProfile, setConsultationProfile] = useState(() => getStoredConsultationProfile());
   const [consultOpen, setConsultOpen] = useState(false);
   const [packagePreset, setPackagePreset] = useState('');
   const [packageModalOpen, setPackageModalOpen] = useState(false);
@@ -763,6 +768,18 @@ function App({ initialContent = defaultContent }) {
   const [preferenceOpen, setPreferenceOpen] = useState(false);
 
   const openConsult = (preset = '') => {
+    const savedProfile = consultationProfile || getStoredConsultationProfile();
+    if (isCompleteConsultationProfile(savedProfile)) {
+      const context = getConsultationContextLabel(preset);
+      openConsultationWhatsApp(savedProfile, siteContent.business, context);
+      trackEvent('consultation_whatsapp', {
+        context: context || savedProfile.event || 'general',
+        city: savedProfile.city,
+        source: 'saved_profile',
+      });
+      return;
+    }
+
     setPackagePreset(preset);
     setConsultOpen(true);
     trackEvent('consultation_open', { context: preset || 'general' });
@@ -916,7 +933,10 @@ function App({ initialContent = defaultContent }) {
 
       <footer><div className="shell footer__top"><div className="footer__brand"><img src="/logo.png?v=20260827b" alt="FMO Wedding Specialist" width="800" height="564" /><p>{siteContent.business.footerDescription}</p></div><div><p className="footer__label">Explore</p><a href="#about">Tentang FMO</a><a href="#workflow">Workflow</a><a href="#guardian">Wedding Day Guardian</a><a href="#packages">Packages</a><a href="#real-weddings">Selected celebrations</a><a href="#services">Other services</a><a href="#gallery">Galeri</a><a href="#faq">FAQ</a></div><div><p className="footer__label">Connect</p><a href={`https://instagram.com/${siteContent.business.instagram.replace('@', '')}`} target="_blank" rel="noreferrer"><FaInstagram /> Instagram</a><a href={`https://tiktok.com/@${siteContent.business.tiktok.replace('@', '')}`} target="_blank" rel="noreferrer"><FaTiktok /> TikTok</a><a href={`https://wa.me/${siteContent.business.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noreferrer"><FaWhatsapp /> WhatsApp</a></div><div><p className="footer__label">Information</p><p>{siteContent.business.address}<br />{siteContent.business.availability}</p><button type="button" onClick={() => setLegalOpen('privacy')}>Privacy Policy</button><button type="button" onClick={() => setLegalOpen('terms')}>Terms of Use</button></div></div><div className="shell footer__bottom"><span>© {new Date().getFullYear()} FMO Wedding Specialist</span><span>expertly <em>yours.</em></span></div></footer>
 
-      <AudioControl onProfileSaved={(profile) => setRecommendedPackageId(getRecommendedPackageId(profile))} />
+      <AudioControl onProfileSaved={(profile) => {
+        setConsultationProfile(profile);
+        setRecommendedPackageId(getRecommendedPackageId(profile));
+      }} />
       <button className="floating-consult" type="button" onClick={() => openConsult()} aria-label="Buka konsultasi"><FaWhatsapp /><span>Konsultasi</span></button>
       {consultOpen && <Consultation isOpen onClose={() => setConsultOpen(false)} preset={packagePreset} />}
       {packageModalOpen && <PackageModal isOpen onClose={() => setPackageModalOpen(false)} packageSize={selectedPackage} onConsult={openConsult} />}
