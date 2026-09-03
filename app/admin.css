@@ -296,6 +296,22 @@
   font-weight: 700;
   white-space: nowrap;
 }
+.admin-media button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+.media-help,
+.upload-info,
+.admin-media .error-text {
+  grid-column: 2;
+  line-height: 1.45;
+}
+.media-help {
+  color: #746f65;
+}
+.upload-info {
+  color: #267048;
+}
 .error-text {
   color: #a8483d !important;
 }
@@ -559,6 +575,11 @@
   }
   .admin-media button {
     padding: 12px;
+  }
+  .media-help,
+  .upload-info,
+  .admin-media .error-text {
+    grid-column: 1;
   }
   .admin-item > header {
     align-items: flex-start;

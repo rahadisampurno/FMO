@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from 'react';
 import type { SiteContent } from '@/src/content';
+import { formatFileSize, getMediaUploadError, prepareMediaUpload } from './media-optimizer';
 
 type ContentKey = keyof SiteContent;
 type JsonObject = Record<string, unknown>;
@@ -132,34 +133,25 @@ function NestedMediaEditor({ value, onChange }: { value: JsonObject[]; onChange:
 function MediaField({ fieldKey, value, onChange }: { fieldKey: string; value: string; onChange: (value: string) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState('');
+  const [uploadInfo, setUploadInfo] = useState('');
   const upload = async (file?: File) => {
     if (!file) return;
-    setUploading(true); setError(false);
+    setUploading(true); setError(''); setUploadInfo('');
     try {
-      const preparedFile = await prepareUpload(file);
-      const body = new FormData(); body.append('file', preparedFile);
+      const prepared = await prepareMediaUpload(file);
+      const body = new FormData(); body.append('file', prepared.file);
       const response = await fetch('/api/admin/media', { method: 'POST', body });
-      if (!response.ok) throw new Error('upload_failed');
-      const result = await response.json() as { url: string }; onChange(result.url);
-    } catch { setError(true); } finally { setUploading(false); }
+      const result = await response.json().catch(() => ({})) as { url?: string; error?: string };
+      if (!response.ok || !result.url) throw new Error(result.error || 'upload_failed');
+      onChange(result.url);
+      const dimensions = prepared.width && prepared.height ? `${prepared.width} × ${prepared.height} px · ` : '';
+      setUploadInfo(`${dimensions}${formatFileSize(prepared.file.size)}${prepared.optimized ? ' · dioptimalkan otomatis' : ''}. Klik Simpan perubahan untuk menerbitkan.`);
+    } catch (uploadError) {
+      setError(getMediaUploadError(uploadError));
+    } finally {
+      setUploading(false);
+    }
   };
-  return <div className="admin-field admin-field--wide admin-media"><span>{labels[fieldKey] || fieldKey}</span><div>{value && fieldKey !== 'music' && <img src={value} alt="Preview media" />}<label><input value={value} onChange={(event) => onChange(event.target.value)} /><button type="button" onClick={() => inputRef.current?.click()}>{uploading ? 'Mengoptimalkan…' : 'Pilih file'}</button><input ref={inputRef} type="file" hidden accept={fieldKey === 'music' ? 'audio/mpeg' : 'image/jpeg,image/png,image/webp,image/avif'} onChange={(event) => upload(event.target.files?.[0])} /></label>{error && <small className="error-text">Upload gagal. Gambar akan dioptimalkan otomatis; file audio maksimum 900 KB.</small>}</div></div>;
-}
-
-async function prepareUpload(file: File) {
-  if (!file.type.startsWith('image/')) {
-    if (file.size > 900_000) throw new Error('file_too_large');
-    return file;
-  }
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, 2000 / Math.max(bitmap.width, bitmap.height));
-  const canvas = document.createElement('canvas');
-  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-  canvas.getContext('2d')?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  bitmap.close();
-  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/webp', 0.82));
-  if (!blob || blob.size > 950_000) throw new Error('image_too_large');
-  return new File([blob], `${file.name.replace(/\.[^.]+$/, '')}.webp`, { type: 'image/webp' });
+  return <div className="admin-field admin-field--wide admin-media"><span>{labels[fieldKey] || fieldKey}</span><div>{value && fieldKey !== 'music' && <img src={value} alt="Preview media" />}<label><input value={value} onChange={(event) => onChange(event.target.value)} /><button type="button" disabled={uploading} onClick={() => inputRef.current?.click()}>{uploading ? 'Mengoptimalkan & mengunggah…' : 'Pilih file'}</button><input ref={inputRef} type="file" hidden accept={fieldKey === 'music' ? 'audio/mpeg' : 'image/*'} onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ''; void upload(file); }} /></label>{fieldKey !== 'music' && !error && !uploadInfo && <small className="media-help">Foto hingga 30 MB dan resolusi tinggi akan dioptimalkan otomatis tanpa mengubah proporsi.</small>}{uploadInfo && <small className="upload-info" role="status">{uploadInfo}</small>}{error && <small className="error-text" role="alert">{error}</small>}</div></div>;
 }
