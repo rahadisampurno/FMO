@@ -1,4 +1,5 @@
-const acceptedStoredImageTypes = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif']);
+import { detectBlobMediaType } from '@/lib/media-type';
+
 const preferredImageQualitySteps = [0.9, 0.84, 0.78];
 const fallbackImageQualitySteps = [0.72, 0.66, 0.58];
 
@@ -29,39 +30,99 @@ export function formatFileSize(bytes: number) {
   return `${(bytes / 1_000_000).toFixed(1)} MB`;
 }
 
-function canvasToWebp(canvas: HTMLCanvasElement, quality: number) {
-  return new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/webp', quality));
+function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality?: number) {
+  return new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, quality));
+}
+
+type EncodedImage = {
+  blob: Blob;
+  contentType: 'image/jpeg' | 'image/png' | 'image/webp' | 'image/avif';
+  extension: 'jpg' | 'png' | 'webp' | 'avif';
+};
+
+async function encodeCanvas(canvas: HTMLCanvasElement, quality: number): Promise<EncodedImage[]> {
+  const candidates: EncodedImage[] = [];
+  const preferredBlob = await canvasToBlob(canvas, 'image/webp', quality);
+  const preferredType = preferredBlob ? await detectBlobMediaType(preferredBlob) : null;
+  if (preferredBlob && preferredType?.kind === 'image') {
+    candidates.push({
+      blob: preferredBlob,
+      contentType: preferredType.contentType,
+      extension: preferredType.extension,
+    });
+  }
+  if (preferredType?.contentType === 'image/webp') return candidates;
+
+  const jpegCanvas = document.createElement('canvas');
+  jpegCanvas.width = canvas.width;
+  jpegCanvas.height = canvas.height;
+  const jpegContext = jpegCanvas.getContext('2d', { alpha: false });
+  if (!jpegContext) return candidates;
+  jpegContext.fillStyle = '#ffffff';
+  jpegContext.fillRect(0, 0, jpegCanvas.width, jpegCanvas.height);
+  jpegContext.drawImage(canvas, 0, 0);
+  const jpegBlob = await canvasToBlob(jpegCanvas, 'image/jpeg', quality);
+  const jpegType = jpegBlob ? await detectBlobMediaType(jpegBlob) : null;
+  if (jpegBlob && jpegType?.contentType === 'image/jpeg') {
+    candidates.push({ blob: jpegBlob, contentType: 'image/jpeg', extension: 'jpg' });
+  }
+  return candidates;
 }
 
 async function loadImage(file: File): Promise<LoadedImage> {
   if (typeof createImageBitmap === 'function') {
-    return createImageBitmap(file, { imageOrientation: 'from-image' });
+    try {
+      return await createImageBitmap(file, { imageOrientation: 'from-image' });
+    } catch {
+      try {
+        return await createImageBitmap(file);
+      } catch {
+        // Continue with the image element decoder for files with legacy metadata.
+      }
+    }
   }
 
   const objectUrl = URL.createObjectURL(file);
-  try {
-    const image = new Image();
-    image.decoding = 'async';
-    image.src = objectUrl;
-    await image.decode();
-    return image;
-  } finally {
+  const image = new Image();
+  image.decoding = 'async';
+  image.src = objectUrl;
+  await image.decode().catch(() => {
     URL.revokeObjectURL(objectUrl);
-  }
+    throw new Error('image_decode_failed');
+  });
+  return Object.assign(image, { close: () => URL.revokeObjectURL(objectUrl) });
 }
 
 export async function prepareMediaUpload(file: File): Promise<PreparedMedia> {
-  if (!file.type.startsWith('image/')) {
-    if (file.type !== 'audio/mpeg') throw new Error('unsupported_file');
+  const detectedType = await detectBlobMediaType(file);
+  if (!detectedType) {
+    throw new Error(file.type.startsWith('image/') ? 'image_decode_failed' : 'unsupported_file');
+  }
+  const baseName = file.name.replace(/\.[^.]+$/, '') || 'fmo-media';
+
+  if (detectedType.kind === 'audio') {
     if (file.size > MAX_AUDIO_BYTES) throw new Error('audio_too_large');
-    return { file, optimized: false };
+    const normalizedAudio = file.type === detectedType.contentType
+      ? file
+      : new File([file], `${baseName}.${detectedType.extension}`, {
+        type: detectedType.contentType,
+        lastModified: file.lastModified,
+      });
+    return { file: normalizedAudio, optimized: normalizedAudio !== file };
   }
 
   if (file.size > MAX_SOURCE_IMAGE_BYTES) throw new Error('source_too_large');
 
+  const normalizedFile = file.type === detectedType.contentType
+    ? file
+    : new File([file], `${baseName}.${detectedType.extension}`, {
+      type: detectedType.contentType,
+      lastModified: file.lastModified,
+    });
+
   let image: LoadedImage;
   try {
-    image = await loadImage(file);
+    image = await loadImage(normalizedFile);
   } catch {
     throw new Error('image_decode_failed');
   }
@@ -71,12 +132,16 @@ export async function prepareMediaUpload(file: File): Promise<PreparedMedia> {
 
     const initialSize = calculateContainDimensions(image.width, image.height);
     if (
-      acceptedStoredImageTypes.has(file.type) &&
-      file.size <= TARGET_IMAGE_BYTES &&
+      normalizedFile.size <= TARGET_IMAGE_BYTES &&
       initialSize.width === image.width &&
       initialSize.height === image.height
     ) {
-      return { file, width: image.width, height: image.height, optimized: false };
+      return {
+        file: normalizedFile,
+        width: image.width,
+        height: image.height,
+        optimized: normalizedFile !== file,
+      };
     }
 
     const canvas = document.createElement('canvas');
@@ -87,36 +152,40 @@ export async function prepareMediaUpload(file: File): Promise<PreparedMedia> {
 
     let outputWidth = initialSize.width;
     let outputHeight = initialSize.height;
-    let smallestResult: { blob: Blob; width: number; height: number } | null = null;
+    let smallestResult: EncodedImage & { width: number; height: number } | null = null;
 
-    while (Math.max(outputWidth, outputHeight) >= 960) {
+    while (true) {
       canvas.width = outputWidth;
       canvas.height = outputHeight;
       context.imageSmoothingEnabled = true;
       context.imageSmoothingQuality = 'high';
       context.drawImage(image, 0, 0, outputWidth, outputHeight);
 
-      const qualitySteps = Math.max(outputWidth, outputHeight) === 960
+      const qualitySteps = Math.max(outputWidth, outputHeight) <= 960
         ? [...preferredImageQualitySteps, ...fallbackImageQualitySteps]
         : preferredImageQualitySteps;
       for (const quality of qualitySteps) {
-        const blob = await canvasToWebp(canvas, quality);
-        if (!blob || blob.type !== 'image/webp') continue;
-        if (!smallestResult || blob.size < smallestResult.blob.size) {
-          smallestResult = { blob, width: outputWidth, height: outputHeight };
-        }
-        if (blob.size <= TARGET_IMAGE_BYTES) {
-          const baseName = file.name.replace(/\.[^.]+$/, '') || 'fmo-image';
-          return {
-            file: new File([blob], `${baseName}.webp`, { type: 'image/webp', lastModified: Date.now() }),
-            width: outputWidth,
-            height: outputHeight,
-            optimized: true,
-          };
+        const candidates = await encodeCanvas(canvas, quality);
+        for (const candidate of candidates) {
+          if (!smallestResult || candidate.blob.size < smallestResult.blob.size) {
+            smallestResult = { ...candidate, width: outputWidth, height: outputHeight };
+          }
+          if (candidate.blob.size <= TARGET_IMAGE_BYTES) {
+            return {
+              file: new File([candidate.blob], `${baseName}.${candidate.extension}`, {
+                type: candidate.contentType,
+                lastModified: Date.now(),
+              }),
+              width: outputWidth,
+              height: outputHeight,
+              optimized: true,
+            };
+          }
         }
       }
 
       const currentMaxEdge = Math.max(outputWidth, outputHeight);
+      if (currentMaxEdge <= 960) break;
       const nextMaxEdge = Math.max(960, Math.round(currentMaxEdge * 0.85));
       const resizeScale = nextMaxEdge / currentMaxEdge;
       const nextWidth = Math.max(1, Math.round(outputWidth * resizeScale));
@@ -127,9 +196,11 @@ export async function prepareMediaUpload(file: File): Promise<PreparedMedia> {
     }
 
     if (smallestResult && smallestResult.blob.size <= 950_000) {
-      const baseName = file.name.replace(/\.[^.]+$/, '') || 'fmo-image';
       return {
-        file: new File([smallestResult.blob], `${baseName}.webp`, { type: 'image/webp', lastModified: Date.now() }),
+        file: new File([smallestResult.blob], `${baseName}.${smallestResult.extension}`, {
+          type: smallestResult.contentType,
+          lastModified: Date.now(),
+        }),
         width: smallestResult.width,
         height: smallestResult.height,
         optimized: true,

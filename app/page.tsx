@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import App from '@/src/App';
 import { readSiteContent } from '@/lib/content-store';
+import { withMediaVersion } from '@/lib/media-url';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,8 +21,8 @@ export async function generateMetadata(): Promise<Metadata> {
     title: content.seo.title,
     description: content.seo.description,
     alternates: { canonical: '/' },
-    openGraph: { title: content.seo.title, description: content.seo.description, url: '/', images: [content.seo.shareImage] },
-    twitter: { card: 'summary_large_image', title: content.seo.title, description: content.seo.description, images: [content.seo.shareImage] },
+    openGraph: { title: content.seo.title, description: content.seo.description, url: '/', images: [withMediaVersion(content.seo.shareImage)] },
+    twitter: { card: 'summary_large_image', title: content.seo.title, description: content.seo.description, images: [withMediaVersion(content.seo.shareImage)] },
   };
 }
 

@@ -5,6 +5,7 @@ import { FaInstagram, FaTiktok, FaWhatsapp, FaVolumeHigh, FaVolumeXmark } from '
 import { HiArrowDownRight, HiArrowUpRight, HiCheck, HiChevronDown, HiOutlineXMark } from 'react-icons/hi2';
 import { defaultContent, mergeSiteContent } from './content';
 import { buildConsultationWhatsAppUrl, getConsultationContextLabel } from './consultation';
+import { withMediaVersion } from '../lib/media-url';
 
 const SiteContentContext = createContext(defaultContent);
 const useSiteContent = () => useContext(SiteContentContext);
@@ -300,7 +301,7 @@ function AudioControl({ onProfileSaved }) {
 
   return (
     <>
-      <audio ref={audioRef} loop src={business.music} preload="metadata" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} />
+      <audio ref={audioRef} loop src={withMediaVersion(business.music)} preload="metadata" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} />
       {stage === 'welcome' && (
         <div className={`entry-screen ${leaving ? 'entry-screen--leaving' : ''}`} role="dialog" aria-modal="true" aria-label="Selamat datang di FMO Wedding Specialist">
           <div className="entry-screen__content">
@@ -397,7 +398,7 @@ function SelectedMoments({ onConsult }) {
     <section className="selected-moments" id="real-weddings">
       <div className="shell">
         <div className="section-heading"><div><p className="eyebrow eyebrow--dark">Selected celebrations</p><h2>Moments with meaning,<br /><em>planned with intention.</em></h2></div><p>Setiap perayaan memiliki skala dan karakter berbeda. Yang tetap sama adalah perhatian pada detail, alur yang tenang, dan pengalaman yang terasa personal.</p></div>
-        <div className="moment-grid">{visibleStories.map((moment, index) => <article className={index === 1 ? 'moment-card moment-card--wide' : 'moment-card'} key={`${moment.title}-${index}`}><div className="moment-card__image"><img src={moment.image} alt={moment.alt} loading="lazy" decoding="async" width="900" height="1100" /></div><div className="moment-card__copy"><span>{String(index + 1).padStart(2, '0')} · {moment.label}</span><h3>{moment.title}</h3><p>{moment.description}</p></div></article>)}</div>
+        <div className="moment-grid">{visibleStories.map((moment, index) => <article className={index === 1 ? 'moment-card moment-card--wide' : 'moment-card'} key={`${moment.title}-${index}`}><div className="moment-card__image"><img src={withMediaVersion(moment.image)} alt={moment.alt} loading="lazy" decoding="async" width="900" height="1100" /></div><div className="moment-card__copy"><span>{String(index + 1).padStart(2, '0')} · {moment.label}</span><h3>{moment.title}</h3><p>{moment.description}</p></div></article>)}</div>
         <div className="selected-moments__cta"><p>Sudah punya gambaran suasana yang ingin diwujudkan?</p><button type="button" className="button button--forest" onClick={() => onConsult('Wedding inspiration')}>Ceritakan inspirasimu <HiArrowUpRight /></button></div>
       </div>
     </section>
@@ -463,7 +464,7 @@ function FeatureCarousel() {
       onTouchEnd={onTouchEnd}
     >
       <div className="team-feature__image">
-        {featureSlides.map((item, index) => <img className={index === active ? 'is-active' : ''} src={item.image} alt={index === active ? item.alt : ''} width={item.width} height={item.height} loading="lazy" decoding="async" aria-hidden={index !== active} key={item.id} />)}
+        {featureSlides.map((item, index) => <img className={index === active ? 'is-active' : ''} src={withMediaVersion(item.image)} alt={index === active ? item.alt : ''} width={item.width} height={item.height} loading="lazy" decoding="async" aria-hidden={index !== active} key={item.id} />)}
         <p className="team-feature__caption" key={slide.caption}>{slide.caption}</p>
       </div>
       <div className="team-feature__copy">
@@ -661,7 +662,7 @@ function PackageModal({ isOpen, onClose, packageSize, onConsult }) {
 function PackageMedia({ item, index }) {
   const [failed, setFailed] = useState(false);
   if (failed) return <div className="package-modal__media-error" role="status"><strong>File {index + 1} belum dapat ditampilkan.</strong><p>Admin dapat mengganti file ini dari Content Studio.</p></div>;
-  return <img src={item.src} alt={item.alt || `Detail paket bagian ${index + 1}`} className="package-modal__image" loading={index === 0 ? 'eager' : 'lazy'} decoding="async" onError={() => setFailed(true)} />;
+  return <img src={withMediaVersion(item.src)} alt={item.alt || `Detail paket bagian ${index + 1}`} className="package-modal__image" loading={index === 0 ? 'eager' : 'lazy'} decoding="async" onError={() => setFailed(true)} />;
 }
 
 function GallerySection({ onOpen }) {
@@ -684,7 +685,7 @@ function GallerySection({ onOpen }) {
         <div className="gallery-preview">
           {previewImages.map((image, index) => (
             <button className={`gallery-preview__item gallery-preview__item--${index + 1}`} type="button" onClick={onOpen} aria-label={`Buka galeri dari foto ${index + 1}`} key={image.src}>
-              <img src={image.src} width="1200" height="1500" alt={image.alt} loading="lazy" decoding="async" />
+              <img src={withMediaVersion(image.src)} width="1200" height="1500" alt={image.alt} loading="lazy" decoding="async" />
               <span>{String(index + 1).padStart(2, '0')}</span>
             </button>
           ))}
@@ -735,7 +736,7 @@ function GalleryModal({ onClose }) {
           <div className="gallery-collection">
             {fullGalleryImages.map((image, index) => (
               <button type="button" onClick={() => { setSelectedIndex(index); trackEvent('gallery_photo_open', { photo: index + 1 }); }} aria-label={`Perbesar foto ${index + 1}: ${image.alt}`} key={image.src}>
-                <img src={image.src} width="1200" height="1500" alt={image.alt} loading="lazy" decoding="async" />
+                <img src={withMediaVersion(image.src)} width="1200" height="1500" alt={image.alt} loading="lazy" decoding="async" />
                 <span>{String(index + 1).padStart(2, '0')}</span>
               </button>
             ))}
@@ -747,7 +748,7 @@ function GalleryModal({ onClose }) {
         <div className="gallery-lightbox" role="dialog" aria-modal="true" aria-label={`Foto ${selectedIndex + 1} dari ${fullGalleryImages.length}`} onMouseDown={(event) => event.target === event.currentTarget && setSelectedIndex(null)}>
           <button className="gallery-lightbox__close" type="button" onClick={() => setSelectedIndex(null)} aria-label="Tutup foto"><HiOutlineXMark /></button>
           <button className="gallery-lightbox__nav gallery-lightbox__nav--previous" type="button" onClick={showPrevious} aria-label="Foto sebelumnya">←</button>
-          <figure><img src={selectedImage.src} alt={selectedImage.alt} /><figcaption><span>{String(selectedIndex + 1).padStart(3, '0')} / {fullGalleryImages.length}</span>{selectedImage.alt}</figcaption></figure>
+          <figure><img src={withMediaVersion(selectedImage.src)} alt={selectedImage.alt} /><figcaption><span>{String(selectedIndex + 1).padStart(3, '0')} / {fullGalleryImages.length}</span>{selectedImage.alt}</figcaption></figure>
           <button className="gallery-lightbox__nav gallery-lightbox__nav--next" type="button" onClick={showNext} aria-label="Foto berikutnya">→</button>
         </div>
       )}
@@ -838,7 +839,7 @@ function App({ initialContent = defaultContent }) {
       <Header onConsult={() => openConsult()} onPackage={openPackage} />
       <main id="main-content">
         <section className="hero" id="home">
-          <div className="hero__image"><img src={siteContent.hero.image} alt={siteContent.hero.imageAlt} width="1920" height="1280" fetchPriority="high" decoding="async" /></div><div className="hero__veil" />
+          <div className="hero__image"><img src={withMediaVersion(siteContent.hero.image)} alt={siteContent.hero.imageAlt} width="1920" height="1280" fetchPriority="high" decoding="async" /></div><div className="hero__veil" />
           <div className="hero__content shell">
             <p className="eyebrow">{siteContent.hero.eyebrow}</p>
             <h1>{siteContent.hero.title}<br /><em>{siteContent.hero.accent}</em></h1>
@@ -880,7 +881,7 @@ function App({ initialContent = defaultContent }) {
 
         <section className="specialists shell" id="specialists">
           <div className="section-heading"><div><p className="eyebrow eyebrow--dark">Meet your team</p><h2>Your personal<br /><em>wedding specialists.</em></h2></div><p>Lebih dari wedding planner—partner yang memahami keinginanmu sekaligus menguasai detail teknisnya.</p></div>
-          <div className="specialist-grid">{siteContent.specialists.filter((specialist) => specialist.active).map((specialist, index) => <a href={`https://instagram.com/${specialist.instagram.replace('@', '')}`} target="_blank" rel="noreferrer" className={index % 2 ? 'specialist specialist--offset' : 'specialist'} key={`${specialist.name}-${index}`}><div><img src={specialist.image} alt={`${specialist.name}, FMO Wedding Specialist`} width="636" height="800" loading="lazy" decoding="async" /></div><span>{specialist.role}</span><h3>{specialist.name}</h3><p>@{specialist.instagram.replace('@', '')} <HiArrowUpRight /></p></a>)}</div>
+          <div className="specialist-grid">{siteContent.specialists.filter((specialist) => specialist.active).map((specialist, index) => <a href={`https://instagram.com/${specialist.instagram.replace('@', '')}`} target="_blank" rel="noreferrer" className={index % 2 ? 'specialist specialist--offset' : 'specialist'} key={`${specialist.name}-${index}`}><div><img src={withMediaVersion(specialist.image)} alt={`${specialist.name}, FMO Wedding Specialist`} width="636" height="800" loading="lazy" decoding="async" /></div><span>{specialist.role}</span><h3>{specialist.name}</h3><p>@{specialist.instagram.replace('@', '')} <HiArrowUpRight /></p></a>)}</div>
         </section>
 
         <section className="guardian" id="guardian">
@@ -916,18 +917,18 @@ function App({ initialContent = defaultContent }) {
           <div className="shell">
             <div className="section-heading section-heading--light"><div><p className="eyebrow">Beyond the wedding day</p><h2>Other FMO<br /><em>services.</em></h2></div><p>Momen bermakna tidak hanya hadir di hari pernikahan. Tim yang sama dapat mendampingimu pada rangkaian perayaan sebelum dan sesudahnya.</p></div>
             <div className="service-grid">
-              {siteContent.services.filter((service) => service.active).map((service, index) => <article className="service-card" key={`${service.title}-${index}`}><div className="service-card__image"><img src={service.image} alt={service.alt} loading="lazy" decoding="async" /><span>{service.label}</span></div><div className="service-card__copy"><span>{String(index + 1).padStart(2, '0')}</span><h3>{service.title}</h3><p>{service.description}</p><button type="button" onClick={() => openConsult(service.title)}>Diskusikan layanan <HiArrowUpRight /></button></div></article>)}
+              {siteContent.services.filter((service) => service.active).map((service, index) => <article className="service-card" key={`${service.title}-${index}`}><div className="service-card__image"><img src={withMediaVersion(service.image)} alt={service.alt} loading="lazy" decoding="async" /><span>{service.label}</span></div><div className="service-card__copy"><span>{String(index + 1).padStart(2, '0')}</span><h3>{service.title}</h3><p>{service.description}</p><button type="button" onClick={() => openConsult(service.title)}>Diskusikan layanan <HiArrowUpRight /></button></div></article>)}
             </div>
           </div>
         </section>
 
         <SelectedMoments onConsult={openConsult} />
 
-        <section className="stories" id="stories"><div className="story-photo"><img src={siteContent.testimonial.image} alt={`${siteContent.testimonial.couple}, FMO Couple`} width="1672" height="941" loading="lazy" decoding="async" /></div><div className="story-copy"><p className="eyebrow">Real couples · Real stories</p><div className="quote-mark">“</div><blockquote>{siteContent.testimonial.quote}</blockquote><p className="story-author">{siteContent.testimonial.couple} <span>· {siteContent.testimonial.label}</span></p><div className="story-nav" aria-hidden="true"><span>01</span><div><i /></div><span>01</span></div></div></section>
+        <section className="stories" id="stories"><div className="story-photo"><img src={withMediaVersion(siteContent.testimonial.image)} alt={`${siteContent.testimonial.couple}, FMO Couple`} width="1672" height="941" loading="lazy" decoding="async" /></div><div className="story-copy"><p className="eyebrow">Real couples · Real stories</p><div className="quote-mark">“</div><blockquote>{siteContent.testimonial.quote}</blockquote><p className="story-author">{siteContent.testimonial.couple} <span>· {siteContent.testimonial.label}</span></p><div className="story-nav" aria-hidden="true"><span>01</span><div><i /></div><span>01</span></div></div></section>
 
         <section className="faq shell" id="faq"><div className="faq__heading"><p className="eyebrow eyebrow--dark">Questions, answered</p><h2>Hal yang sering<br /><em>ditanyakan.</em></h2><p>Belum menemukan jawabanmu? Wedding Specialist kami siap membantu lewat konsultasi personal.</p><button type="button" className="button button--forest" onClick={() => openConsult()}>Tanya specialist <HiArrowUpRight /></button></div><div className="faq__list">{siteContent.faq.filter((item) => item.active).map(({ question, answer }, index) => <details key={`${question}-${index}`} open={index === 0}><summary><span>{String(index + 1).padStart(2, '0')}</span>{question}<HiChevronDown /></summary><p>{answer}</p></details>)}</div></section>
 
-        <section className="closing"><div className="closing__image"><img src={siteContent.closing.image} alt="FMO wedding celebration" width="1672" height="941" loading="lazy" decoding="async" /></div><div className="closing__veil" /><div className="closing__content shell"><p className="eyebrow">{siteContent.closing.eyebrow}</p><h2>{siteContent.closing.title}<br /><em>{siteContent.closing.accent}</em></h2><p>{siteContent.closing.description}</p><button className="button button--gold" type="button" onClick={() => openConsult()}>{siteContent.closing.buttonLabel} <HiArrowUpRight /></button></div></section>
+        <section className="closing"><div className="closing__image"><img src={withMediaVersion(siteContent.closing.image)} alt="FMO wedding celebration" width="1672" height="941" loading="lazy" decoding="async" /></div><div className="closing__veil" /><div className="closing__content shell"><p className="eyebrow">{siteContent.closing.eyebrow}</p><h2>{siteContent.closing.title}<br /><em>{siteContent.closing.accent}</em></h2><p>{siteContent.closing.description}</p><button className="button button--gold" type="button" onClick={() => openConsult()}>{siteContent.closing.buttonLabel} <HiArrowUpRight /></button></div></section>
         <GallerySection onOpen={() => { setGalleryOpen(true); trackEvent('gallery_open'); }} />
       </main>
 

@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from 'react';
 import type { SiteContent } from '@/src/content';
+import { withMediaVersion } from '@/lib/media-url';
 import { formatFileSize, getMediaUploadError, prepareMediaUpload } from './media-optimizer';
 
 type ContentKey = keyof SiteContent;
@@ -153,5 +154,5 @@ function MediaField({ fieldKey, value, onChange }: { fieldKey: string; value: st
       setUploading(false);
     }
   };
-  return <div className="admin-field admin-field--wide admin-media"><span>{labels[fieldKey] || fieldKey}</span><div>{value && fieldKey !== 'music' && <img src={value} alt="Preview media" />}<label><input value={value} onChange={(event) => onChange(event.target.value)} /><button type="button" disabled={uploading} onClick={() => inputRef.current?.click()}>{uploading ? 'Mengoptimalkan & mengunggah…' : 'Pilih file'}</button><input ref={inputRef} type="file" hidden accept={fieldKey === 'music' ? 'audio/mpeg' : 'image/*'} onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ''; void upload(file); }} /></label>{fieldKey !== 'music' && !error && !uploadInfo && <small className="media-help">Foto hingga 30 MB dan resolusi tinggi akan dioptimalkan otomatis tanpa mengubah proporsi.</small>}{uploadInfo && <small className="upload-info" role="status">{uploadInfo}</small>}{error && <small className="error-text" role="alert">{error}</small>}</div></div>;
+  return <div className="admin-field admin-field--wide admin-media"><span>{labels[fieldKey] || fieldKey}</span><div>{value && fieldKey !== 'music' && <img src={withMediaVersion(value)} alt="Preview media" />}<label><input value={value} onChange={(event) => { setError(''); setUploadInfo(''); onChange(event.target.value); }} /><button type="button" disabled={uploading} onClick={() => inputRef.current?.click()}>{uploading ? 'Mengoptimalkan & mengunggah…' : 'Pilih file'}</button><input ref={inputRef} type="file" hidden accept={fieldKey === 'music' ? 'audio/mpeg' : 'image/*'} onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ''; void upload(file); }} /></label>{fieldKey !== 'music' && !error && !uploadInfo && <small className="media-help">Foto hingga 30 MB dan resolusi tinggi akan dioptimalkan otomatis tanpa mengubah proporsi.</small>}{uploadInfo && <small className="upload-info" role="status">{uploadInfo}</small>}{error && <small className="error-text" role="alert">{error}</small>}</div></div>;
 }

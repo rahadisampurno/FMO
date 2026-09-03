@@ -1,5 +1,6 @@
 import type { RowDataPacket } from 'mysql2';
 import { ensureDatabaseSchema, getDatabase } from '@/lib/database';
+import { detectMediaType } from '@/lib/media-type';
 
 export const runtime = 'nodejs';
 
@@ -17,9 +18,10 @@ export async function GET(request: Request, context: { params: Promise<{ key: st
     );
     const object = rows[0];
     if (!object) return new Response('Not found', { status: 404 });
+    const detectedType = detectMediaType(object.payload.subarray(0, 32));
     const etag = `"${object.etag}"`;
     const headers = new Headers({
-      'content-type': object.content_type,
+      'content-type': detectedType?.contentType || object.content_type,
       'content-length': String(object.payload.length),
       'etag': etag,
       'cache-control': 'public, max-age=31536000, immutable',
